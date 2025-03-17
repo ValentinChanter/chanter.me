@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "chanter.me",
-  description: "Chanter's personal website",
+  title: "chanter.me - Home",
+  description: "Not a website about music. Just a bunch of stuff I did during my free time, nothing to see here but you can try to find some routes.",
 };
 
 export default function RootLayout({
