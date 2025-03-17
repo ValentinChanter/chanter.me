@@ -6,28 +6,74 @@ export default function Home() {
     const [username, setUsername] = useState("");
     const [currentLevel, setCurrentLevel] = useState(0);
     const [level2Password, setLevel2Password] = useState("");
+    const [jwt, setJwt] = useState("");
 
     function start(e: FormEvent) {
-        // Send timestamp and username to server
         if (username.match(/\w{2,}/)) {
+            fetch("/api/start", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username }),
+            }).then((res) => {
+                if (res.ok) {
+                    return res.json();
+                }
+            }).then((data) => {
+                if (data) {
+                    setJwt(data.token);
+                    setUsername("");
+
             setCurrentLevel(1);
+                }
+            });     
         }
 
         e.preventDefault();
     }
 
     function checkLevel1(e: FormEvent) {
-        // Send timestamp to server
+        fetch("/api/level1", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: jwt }),
+        }).then((res) => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then((data) => {
+            if (data) {
+                setJwt(data.token);
+
         setCurrentLevel(2);
+            }
+        });
 
         e.preventDefault();
     }
 
     function checkLevel2(e: FormEvent) {
-        if (level2Password === process.env.LEVEL_2_PASS) { // check password server-side instead (env won't work client side)
-            // timestamp
+        fetch("/api/level2", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: jwt, pass: level2Password }),
+        }).then((res) => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then((data) => {
+            if (data) {
+                setJwt(data.token);
+                setLevel2Password("");
+                
             setCurrentLevel(3);
         }
+        });
 
         e.preventDefault();
     }
@@ -46,7 +92,11 @@ export default function Home() {
 
                     {currentLevel === 1 && (
                         <form className="flex flex-col self-center" onSubmit={(e) => checkLevel1(e)}>
-                            <button disabled className="rounded-full border-slate-500 border-1 px-4 py-3 cursor-not-allowed">Continue to Level 2</button>
+                            <div className="mb-2 flex flex-col">
+                                <span>You have been given a JWT to track your progress.</span>
+                                <span className="flex flex-row justify-center">Please do not lose or modify it.</span>
+                            </div>
+                            <button disabled className="rounded-full border-slate-500 border-1 px-4 py-3 cursor-not-allowed">Got it. Take me to Level 2.</button>
                         </form>
                     )}
 
