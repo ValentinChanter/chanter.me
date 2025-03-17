@@ -25,7 +25,7 @@ export default function Home() {
                     setJwt(data.token);
                     setUsername("");
 
-            setCurrentLevel(1);
+                    setCurrentLevel(1);
                 }
             });     
         }
@@ -48,7 +48,7 @@ export default function Home() {
             if (data) {
                 setJwt(data.token);
 
-        setCurrentLevel(2);
+                setCurrentLevel(2);
             }
         });
 
@@ -71,11 +71,27 @@ export default function Home() {
                 setJwt(data.token);
                 setLevel2Password("");
                 
-            setCurrentLevel(3);
-        }
+                setCurrentLevel(3);
+            }
         });
 
         e.preventDefault();
+    }
+
+    function end() {
+        console.log("end")
+        fetch("/api/end", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: jwt }),
+        }).then((res) => {
+            if (res.ok) {
+                setJwt("");
+                setCurrentLevel(0);
+            }
+        });
     }
 
     return (
@@ -106,7 +122,18 @@ export default function Home() {
                             <input id="password" type="password" disabled className="bg-slate-800 rounded-lg px-2 py-1 cursor-not-allowed" onChange={(e) => setLevel2Password(e.target.value)} value={level2Password}></input>
                         </form>
                     )}
-                    <div></div>
+
+                    {currentLevel === 3 && (
+                        <span className="flex flex-row justify-center">Nothing here... for now</span>
+                    )}
+
+                    {currentLevel > 1 ? (
+                        <div className="flex flex-row justify-end">
+                            <button className="rounded-full border-red-600 border-1 px-4 py-3 cursor-pointer hover:bg-red-600" onClick={() => end()}>Forfeit</button>
+                        </div>
+                    ) : (
+                        <div></div>
+                    )}
                 </div>
             </main>
         </div>
