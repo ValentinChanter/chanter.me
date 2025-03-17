@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <a href="https://chanter.me">
+    <img src="https://i.imgur.com/JGeJ7EL.png" height="128">
+    <h3 align="center">chanter.me</h3>
+  </a>
+</p>
 
-## Getting Started
+<p align="center">My own personal website</p>
 
-First, run the development server:
+<br/>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Introduction
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This is a website where I throw mostly random stuff I think of on my free time. The website is made with [Next.js](https://nextjs.org/) and [Tailwind CSS](https://tailwindcss.com/).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If somehow you want to run this website on your own, here's how to do so:
 
-## Learn More
+1. Clone this repo and access it
 
-To learn more about Next.js, take a look at the following resources:
+	```bash
+	git clone https://github.com/ValentinChanter/chanter.me
+	cd chanter.me
+	```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Install node dependencies
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+	```bash
+    npm install
+    # or
+	pnpm install
+	```
 
-## Deploy on Vercel
+3. Run the development server
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+	```bash
+	npm run dev
+    # or
+	pnpm dev
+	```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the app
+
+## Features
+
+The index is empty but some endpoints are manually reachable. They respectively contain:
+- a CTF-like challenge ~~with a leaderboard~~
+- ~~a french Wikipedia race (or Wikirace) random bingo generator~~
