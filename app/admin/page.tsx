@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 
-export default function Home() {
+export default function Admin() {
     const [username, setUsername] = useState("");
     const [currentLevel, setCurrentLevel] = useState(0);
     const [level2Password, setLevel2Password] = useState("");
