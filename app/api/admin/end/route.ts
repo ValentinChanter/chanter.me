@@ -1,5 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import * as jwt from "jsonwebtoken";
+
+declare module "jsonwebtoken" {
+    export interface JwtPayload {
+        username: string;
+        level1: number;
+        level2?: number;
+        // TODO: Add the rest
+    }
+}
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -8,9 +17,9 @@ export async function POST(req: NextRequest) {
     try {
         const secret = <jwt.Secret> process.env.JWT_SECRET;
         const decoded = <jwt.JwtPayload> jwt.verify(token, secret);
-        if (decoded.start < Date.now()) {
-            const newToken = jwt.sign({ ...decoded, level1: Date.now() }, secret);
-            return NextResponse.json({ token: newToken });
+        if (decoded.level1 && decoded.level1 < Date.now()) {
+            // TODO:  Upload username, best level, and completion time (for each level?) to database
+            return new Response("Successfully ended", { status: 200 });
         } else {
             return new Response("Invalid token", { status: 400 });
         }
