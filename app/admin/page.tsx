@@ -10,7 +10,7 @@ export default function Home() {
 
     function start(e: FormEvent) {
         if (username.match(/\w{2,}/)) {
-            fetch("/api/start", {
+            fetch("/api/admin/start", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export default function Home() {
     }
 
     function checkLevel1(e: FormEvent) {
-        fetch("/api/level1", {
+        fetch("/api/admin/level1", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export default function Home() {
     }
 
     function checkLevel2(e: FormEvent) {
-        fetch("/api/level2", {
+        fetch("/api/admin/level2", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -79,8 +79,7 @@ export default function Home() {
     }
 
     function end() {
-        console.log("end")
-        fetch("/api/end", {
+        fetch("/api/admin/end", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
