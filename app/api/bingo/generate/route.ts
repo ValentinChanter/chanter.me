@@ -3,6 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 
 import * as jwt from "jsonwebtoken";
+import * as fs from "fs";
+import * as path from "path";
 
 import { CONFIG } from "@/config/bingo";
 
@@ -43,8 +45,10 @@ export async function POST(req: NextRequest) {
             });
 
             if (user && user.username === "Admin") {
-                // If wordlist wasn't loaded yet, load it
-                if (wordlist.length === 0) {
+
+                const data = fs.readFileSync(path.join(process.cwd(), "public",  `frwiki-${CONFIG.date}-all-titles-in-ns-0`), "utf8");
+
+                if (!data) {
                     const file = await r2.send(new GetObjectCommand({
                         Bucket: process.env.R2_BUCKET_NAME,
                         Key: `frwiki-${CONFIG.date}-all-titles-in-ns-0`,
@@ -60,9 +64,15 @@ export async function POST(req: NextRequest) {
                     if (wordlist.length === 0) {
                         return new Response("Wordlist empty", { status: 500 });
                     }
+
+                    console.log("[WARN] Reading wordlist from R2 Bucket");
                 }
 
-                console.log(wordlist)
+                wordlist = data.split("\n").filter(word => !CONFIG.wordBlacklist.some((regex) => regex.test(word)));
+
+                if (wordlist.length === 0) {
+                    return new Response("Wordlist empty", { status: 500 });
+                }
 
                 const words = [] as string[];
 
