@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "prepare": "next-ws patch",
+    "postinstall": "npx prisma db pull && npx prisma generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
