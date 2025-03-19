@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { PrismaClient } from "@prisma/client";
+import { GetObjectCommand } from '@aws-sdk/client-s3'
 
 import * as jwt from "jsonwebtoken";
-import * as fs from "fs";
-import * as path from "path";
 
 import { CONFIG } from "@/config/bingo";
+
+import { r2 } from '@/lib/r2';
 
 const prisma = new PrismaClient();
 
 let wordlist = [] as string[];
-fs.readFile(path.join(process.cwd(), "public",  `frwiki-${CONFIG.date}-all-titles-in-ns-0`), "utf8", (err, data) => {
-    if (err) {
-        console.error(err);
-        return;
-    }
-
-    wordlist = data.split("\n").filter(word => !CONFIG.wordBlacklist.some((regex) => regex.test(word)));
-});
 
 function genCode() {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -51,11 +43,28 @@ export async function POST(req: NextRequest) {
             });
 
             if (user && user.username === "Admin") {
-                const words = [] as string[];
-
+                // If wordlist wasn't loaded yet, load it
                 if (wordlist.length === 0) {
-                    return new Response("Wordlist empty", { status: 500 });
+                    const file = await r2.send(new GetObjectCommand({
+                        Bucket: process.env.R2_BUCKET_NAME,
+                        Key: `frwiki-${CONFIG.date}-all-titles-in-ns-0`,
+                    }));
+
+                    if (!file || !file.Body) {
+                        return new Response("Wordlist not found", { status: 500 });
+                    }
+
+                    const data = await file.Body.transformToString();
+                    wordlist = data.split("\n").filter(word => !CONFIG.wordBlacklist.some((regex) => regex.test(word)));
+
+                    if (wordlist.length === 0) {
+                        return new Response("Wordlist empty", { status: 500 });
+                    }
                 }
+
+                console.log(wordlist)
+
+                const words = [] as string[];
 
                 if (wordlist.length <= 25) {
                     words.push(...wordlist);
