@@ -30,5 +30,5 @@ body {
 }
 
 .dark-button {
-  @apply outline outline-white/15 bg-[#2D2D34] hover:bg-gray-600 active:bg-gray-700 rounded-full;
+  @apply outline outline-white/15 bg-[#2D2D34] enabled:hover:bg-gray-600 enabled:active:bg-gray-700 rounded-full;
 }
