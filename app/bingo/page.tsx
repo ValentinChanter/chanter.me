@@ -67,7 +67,7 @@ export default function Bingo() {
     }
 
     // WebSocket setup
-    const [cells, sendGrid, setGrid] = useCells(() => `ws://${window.location.host}/api/bingo/socket`);
+    const [cells, sendGrid, setGrid] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
 
     useEffect(() => {
         if (hasCookie("jwt")) {
