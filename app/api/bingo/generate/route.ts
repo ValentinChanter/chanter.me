@@ -12,8 +12,6 @@ import { r2 } from '@/lib/r2';
 
 const prisma = new PrismaClient();
 
-let wordlist = [] as string[];
-
 function genCode() {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
@@ -45,6 +43,7 @@ export async function POST(req: NextRequest) {
             });
 
             if (user && user.username === "Admin") {
+                let wordlist: string[] = [];
 
                 const data = fs.readFileSync(path.join(process.cwd(), "public",  `frwiki-${CONFIG.date}-all-titles-in-ns-0`), "utf8");
 
