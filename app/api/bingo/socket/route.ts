@@ -1,10 +1,10 @@
-import { WebSocket, WebSocketServer } from "ws";
+/*import { WebSocket, WebSocketServer } from "ws";
 
 // Extend the WebSocket type to include the isAlive property
 interface ExtendedWebSocket extends WebSocket {
     isAlive: boolean;
 }
-import { IncomingMessage } from "node:http";
+import { IncomingMessage } from "node:http";*/
 
 export function GET() {
     const headers = new Headers();
