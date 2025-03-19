@@ -1,10 +1,10 @@
-/*import { WebSocket, WebSocketServer } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
 
 // Extend the WebSocket type to include the isAlive property
 interface ExtendedWebSocket extends WebSocket {
     isAlive: boolean;
 }
-import { IncomingMessage } from "node:http";*/
+import { IncomingMessage } from "node:http";
 
 export function GET() {
     const headers = new Headers();
@@ -13,7 +13,6 @@ export function GET() {
     return new Response('Upgrade Required', { status: 426, headers });
 }
 
-/*
 export function SOCKET(
     client: ExtendedWebSocket,
     _request: IncomingMessage,
@@ -50,4 +49,4 @@ export function SOCKET(
         clearInterval(interval);
         console.log("A client disconnected");
     });
-}*/
+}
