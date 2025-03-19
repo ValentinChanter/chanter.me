@@ -125,8 +125,10 @@ export default function Bingo() {
                         <div className="grid grid-cols-5 grid-rows-5 gap-2">
                             {cells.length === 25 ? (
                                 cells.map((cell, i) => (
-                                    <div key={i} className="outline outline-white/15 rounded-lg break-words p-2 text-white aspect-square text-center flex flex-col justify-center cursor-pointer hover:bg-gray-600 active:bg-gray-700 text-sm">
-                                        {cell.word.replace(/_/g, " ") || i + 1}
+                                    <div key={i} className="outline outline-white/15 rounded-lg p-1 text-white overflow-y-auto no-scrollbar aspect-square text-center cursor-pointer hover:bg-gray-600 active:bg-gray-700 text-sm flex">
+                                        <div className="overflow-x-auto m-auto">
+                                            <span className="break-words">{cell.word.replace(/_/g, " ") || i + 1}</span>
+                                        </div>
                                     </div>
                                 )
                             )) : (

@@ -32,3 +32,14 @@ body {
 .dark-button {
   @apply outline outline-white/15 bg-[#2D2D34] enabled:hover:bg-gray-600 enabled:active:bg-gray-700 rounded-full;
 }
+
+/* Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
