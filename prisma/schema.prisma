@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bingoGrids {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  grid    Json[]
+  players String[] @db.Uuid
+  code    String   @unique
+  owner   String   @db.Uuid
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model leaderboard {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username   String
+  best_level BigInt
+  time       DateTime @db.Timestamp(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username    String
+  password    String
+  currentUUID String? @db.Uuid
+  color       String?
+}
