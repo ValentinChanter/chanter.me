@@ -13,5 +13,47 @@ export const CONFIG = {
         /(?:1|2)\d{3}_en_/, // 1XXX ou 2XXX en
         /^tournoi/i, // Tournois en général
         /_de_(?:1|2)\d{3}_/, // Les coups d'état et autres événements " de 1XXX/2XXX "
+    ],
+    colors: [
+        {
+            name: "Rouge",
+            hex: "#ba2f2f"
+        },
+        {
+            name: "Orange",
+            hex: "#cc7121"
+        },
+        {
+            name: "Jaune",
+            hex: "#d9cf1c"
+        },
+        {
+            name: "Lime",
+            hex: "#add91c"
+        },
+        {
+            name: "Vert",
+            hex: "#63c21f"
+        },
+        {
+            name: "Cyan",
+            hex: "#1fc2ba"
+        },
+        {
+            name: "Bleu",
+            hex: "#1f8cc2"
+        },
+        {
+            name: "Indigo",
+            hex: "#5d1fc2"
+        },
+        {
+            name: "Violet",
+            hex: "#7f1ea8"
+        },
+        {
+            name: "Rose",
+            hex: "#a11a78"
+        }
     ]
 };
