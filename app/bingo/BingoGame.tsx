@@ -13,7 +13,7 @@ export default function BingoGame({ code }: { code: string }) {
     const setCookie = useSetCookie();
     const router = useRouter();
 
-    const [_, setReceivedNewToken] = useState(false);
+    const [receivedNewToken, setReceivedNewToken] = useState(false);
 
     function generateGrid() {
         fetch("/api/bingo/generateGrid", {
@@ -37,9 +37,11 @@ export default function BingoGame({ code }: { code: string }) {
     }
 
     // WebSocket setup
-    const [cells, sendGrid, setGrid] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
+    const [cells] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
 
     useEffect(() => {
+        // Now it's called twice after the token is received
+
         // useEffect is fired twice without token on a normal use-case, then once with a token
         if (hasCookie("jwt")) {
             console.log(getCookie("jwt"));
@@ -59,7 +61,7 @@ export default function BingoGame({ code }: { code: string }) {
             }).then((data) => {
                 if (data) {
                     if (data.token) setCookie("jwt", data.token);
-                    setReceivedNewToken(true); // Refresh useEffect to make the page render
+                    if (!receivedNewToken) setReceivedNewToken(true); // Refresh useEffect to make the page render
 
                     // TODO: Récupérer la grille
                 }
@@ -76,7 +78,7 @@ export default function BingoGame({ code }: { code: string }) {
 
             return () => clearTimeout(timeout); // Cleanup in case token appears
         }
-    }, [hasCookie, getCookie, setCookie, setReceivedNewToken, router, code]);
+    }, [hasCookie, getCookie, setCookie, receivedNewToken, setReceivedNewToken, router, code]);
 
     return (
         <div className='flex h-screen'>
