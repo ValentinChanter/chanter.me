@@ -33,3 +33,12 @@ model users {
   currentUUID String? @db.Uuid
   color       String?
 }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bingoPlayers {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicID String @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomCode String
+  color    String
+  username String
+}
