@@ -3,9 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useSetCookie } from 'cookies-next/client';
 
-export default function BingoHome() {
+function Bingo() {
     const [username, setUsername] = useState("");
     const [code, setCode] = useState("");
     const [token, setToken] = useState("");
@@ -90,7 +91,7 @@ export default function BingoHome() {
                         <input required id="createUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setUsername(e.target.value)}></input>
                     </div>
                     <div className="flex flex-col space-y-2 mb-4">
-                        <label htmlFor="token">Jeton d'authentification</label>
+                        <label htmlFor="token">Jeton d&apos;authentification</label>
                         <input required id="token" type="password" value={token} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setToken(e.target.value)}></input>
                     </div>
                     {createError && (
@@ -100,5 +101,13 @@ export default function BingoHome() {
                 <button disabled={loading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{loading ? "Création en cours... Veuillez patienter." : "Créer un salon"}</button>
             </form>
         </div>
+    )
+}
+
+export default function BingoHome() {
+    return (
+        <Suspense>
+            <Bingo />
+        </Suspense>
     )
 }
