@@ -93,5 +93,16 @@ export function useCells(url: () => string) {
         setPlayers(players);
     }, []);
 
-    return [cells, setGrid, sendCell, updateToken, players, setPlayerList] as const;
+    const sendGrid = useCallback((grid: Cell[], token: string) => {
+        if (!jwtDecode<{ owner: boolean }>(token).owner) return
+
+        if (!ref.current || ref.current.readyState !== ref.current.OPEN) return;
+
+        ref.current.send(JSON.stringify({ action: 'setGrid', grid, token }));
+
+        // Send to others and set it locally (the owner will see the changes a few ms earlier but we save some bandwidth)
+        setGrid(grid);
+    }, [setGrid]);
+
+    return [cells, setGrid, sendCell, updateToken, players, setPlayerList, sendGrid] as const;
 }
