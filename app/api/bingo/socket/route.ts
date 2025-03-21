@@ -146,7 +146,7 @@ export function SOCKET(
                     break;
 
                 case "leave":
-                    await prisma.bingoGrids.update({
+                    const gridAfterLeave = await prisma.bingoGrids.update({
                         where: {
                             code: roomCode
                         },
@@ -156,6 +156,21 @@ export function SOCKET(
                             }
                         }
                     });
+
+                    // If nobody is left in the room, delete it and all users associated with it
+                    if (gridAfterLeave.players.length === 0) {
+                        await prisma.bingoGrids.delete({
+                            where: {
+                                code: roomCode
+                            }
+                        });
+
+                        await prisma.bingoPlayers.deleteMany({
+                            where: {
+                                roomCode
+                            }
+                        });
+                    }
 
                     // Send the updated player list to all clients
                     sendToAllInRoomExcept(roomCode, { action: "removePlayer", publicID: player.publicID }, client);
