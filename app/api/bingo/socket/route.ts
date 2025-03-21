@@ -95,6 +95,10 @@ export function SOCKET(
             const { player, grid } = res;
 
             switch (action) {
+                case "ping":
+                    client.send(JSON.stringify({ action: "pong" }));
+                    break;
+
                 case "join":
                     sendToAllInRoomExcept(roomCode, { action: "addPlayer", player: { publicID: player.publicID, username: player.username, color: player.color } }, client);
                     break;
