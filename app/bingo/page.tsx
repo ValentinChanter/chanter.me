@@ -112,7 +112,9 @@ function Bingo() {
         <div className='flex h-screen'>
             <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[450px] dark-rectangle" onSubmit={(e) => joinRoom(e)}>
                 <div>
-                    <span className="text-3xl">Rejoindre un salon</span>
+                    <div className="h-[50px]">
+                        <span className="text-3xl">Rejoindre un salon</span>
+                    </div>
                     <div className="flex flex-col space-y-2 my-8">
                         <label htmlFor="joinUsername">Nom d&apos;utilisateur</label>
                         <input required id="joinUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setUsername(e.target.value)}></input>
@@ -127,8 +129,10 @@ function Bingo() {
 
             <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[450px] dark-rectangle" onSubmit={(e) => createRoom(e)}>
                 <div>
-                    <span className="text-3xl">Créer un salon</span>
-                    <span className=" ml-4 text-xs">Par souci de bande passante, cette fonctionnalité est restreinte.</span>
+                    <div className="h-[50px]">
+                        <span className="text-3xl">Créer un salon</span>
+                        <span className=" ml-4 text-xs">Par souci de bande passante, cette fonctionnalité est restreinte.</span>
+                    </div>
                     <div className="flex flex-col space-y-2 my-8">
                         <label htmlFor="createUsername">Nom d&apos;utilisateur</label>
                         <input required id="createUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setUsername(e.target.value)}></input>
