@@ -116,7 +116,7 @@ function Bingo() {
 
     return (
         <div className='flex h-screen'>
-            <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[450px] dark-rectangle" onSubmit={(e) => joinRoom(e)}>
+            <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[480px] dark-rectangle" onSubmit={(e) => joinRoom(e)}>
                 <div>
                     <div className="h-[50px]">
                         <span className="text-3xl">Rejoindre un salon</span>
@@ -136,7 +136,7 @@ function Bingo() {
                 <button disabled={joinLoading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{joinLoading ? "Connexion en cours... Veuillez patienter." : "Rejoindre le salon"}</button>
             </form>
 
-            <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[450px] dark-rectangle" onSubmit={(e) => createRoom(e)}>
+            <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[480px] dark-rectangle" onSubmit={(e) => createRoom(e)}>
                 <div>
                     <div className="h-[50px]">
                         <span className="text-3xl">Créer un salon</span>
