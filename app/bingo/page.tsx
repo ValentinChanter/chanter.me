@@ -4,21 +4,25 @@ import { FormEvent, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { useSetCookie } from 'cookies-next/client';
+import { useSetCookie, useGetCookie, useHasCookie } from 'cookies-next/client';
 
 function Bingo() {
     const [username, setUsername] = useState("");
     const [code, setCode] = useState("");
     const [token, setToken] = useState("");
+    const [joinError, setJoinError] = useState("");
     const [createError, setCreateError] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [joinLoading, setJoinLoading] = useState(false);
+    const [createLoading, setCreateLoading] = useState(false);
 
     const router = useRouter();
     const searchParams = useSearchParams();
     const setCookie = useSetCookie();
+    const getCookie = useGetCookie();
+    const hasCookie = useHasCookie();
 
     function createRoom(e: FormEvent) {
-        setLoading(true);
+        setCreateLoading(true);
         fetch("/api/bingo/createRoom", {
             method: "POST",
             headers: {
@@ -42,6 +46,8 @@ function Bingo() {
                         setCreateError("Une erreur inconnue s'est produite. Veuillez réessayer.");
                         break;
                 }
+
+                setCreateLoading(false);
             }
         }).then((data) => {
             if (data) {
@@ -119,12 +125,15 @@ function Bingo() {
                         <label htmlFor="joinUsername">Nom d&apos;utilisateur</label>
                         <input required id="joinUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setUsername(e.target.value)}></input>
                     </div>
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex flex-col space-y-2 mb-4">
                         <label htmlFor="code">Code du salon</label>
                         <input required id="code" type="text" value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setCode(e.target.value)}></input>
                     </div>
+                    {joinError && (
+                        <span className="text-red-500">{joinError}</span>
+                    )}
                 </div>
-                <button className="py-4 mt-8 w-full cursor-pointer dark-button">Rejoindre le salon</button>
+                <button disabled={joinLoading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{joinLoading ? "Connexion en cours... Veuillez patienter." : "Rejoindre le salon"}</button>
             </form>
 
             <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[450px] dark-rectangle" onSubmit={(e) => createRoom(e)}>
@@ -145,7 +154,7 @@ function Bingo() {
                         <span className="text-red-500">{createError}</span>
                     )}
                 </div>
-                <button disabled={loading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{loading ? "Création en cours... Veuillez patienter." : "Créer un salon"}</button>
+                <button disabled={createLoading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{createLoading ? "Création en cours... Veuillez patienter." : "Créer un salon"}</button>
             </form>
         </div>
     )
