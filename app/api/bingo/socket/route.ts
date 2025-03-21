@@ -32,7 +32,7 @@ function sendToAllInRoom(roomCode: string, message: object) {
     for (const client of clientsInRoom) {
         if (client.readyState === client.OPEN) {
             client.send(rawData);
-}
+        }
     }
 }
 
@@ -144,9 +144,9 @@ export function SOCKET(
                         data: {
                             players: {
                                 set: grid.players.filter((p) => p !== player.id)
-            }
-        }
-    });
+                            }
+                        }
+                    });
 
                     // Send the updated player list to all clients
                     sendToAllInRoomExcept(roomCode, { action: "removePlayer", publicID: player.publicID }, client);
@@ -160,7 +160,7 @@ export function SOCKET(
         } catch {
             console.error("Invalid token");
             return;
-            }
+        }
     });
   
     client.on("close", () => {
