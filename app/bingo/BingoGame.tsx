@@ -77,12 +77,43 @@ export default function BingoGame({ code }: { code: string }) {
     
         validateToken();
     }, [hasCookie, getCookie, setCookie, router, code]);
-                }
-            }, 1);
-
-            return () => clearTimeout(timeout); // Cleanup in case token appears
+    
+    useEffect(() => {
+        // The token will be undefined, then it will be in the process of being validated, and only after we can start fetching the grid
+        if (!token || isTokenValidating) return;
+    
+        const fetchGrid = async () => {
+            try {
+                const response = await fetch(`/api/bingo/getGridAndPlayers`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ code }),
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    setGrid(data.grid);
+                    setPlayerList(data.players);
         }
-    }, [hasCookie, getCookie, setCookie, receivedNewToken, setReceivedNewToken, router, code]);
+            } catch (error) {
+                console.error("Grid or players fetch failed:", error);
+            }
+        };
+    
+        fetchGrid();
+    }, [token, isTokenValidating, code, setGrid, setPlayerList]);
+
+    // Refresh token on mount
+    useEffect(() => {
+        if (hasCookie("jwt")) {
+            updateToken(getCookie("jwt") as string);
+        } else {
+            updateToken(null);
+        }
+    }, [hasCookie, getCookie, updateToken]);
 
     return (
         <div className='flex h-screen'>
