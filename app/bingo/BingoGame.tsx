@@ -67,7 +67,7 @@ export default function BingoGame({ code }: { code: string }) {
                 if (data.token) {
                     setCookie("jwt", data.token);
                 }
-                
+
                 setToken(getCookie("jwt") as string);
                 setIsTokenValidating(false);
             } catch (error) {
@@ -77,7 +77,7 @@ export default function BingoGame({ code }: { code: string }) {
         };
     
         validateToken();
-    }, [hasCookie, getCookie, setCookie, router, code]);
+    }, [hasCookie, getCookie, setCookie, setToken, router, code]);
     
     useEffect(() => {
         // The token will be undefined, then it will be in the process of being validated, and only after we can start fetching the grid
@@ -107,7 +107,7 @@ export default function BingoGame({ code }: { code: string }) {
         };
     
         fetchGrid();
-    }, [token, isTokenValidating, code, setGrid, setPlayerList]);
+    }, [token, isTokenValidating, code, setGrid, setPlayerList, setStartWord]);
 
     return (
         <div className='flex h-screen'>
