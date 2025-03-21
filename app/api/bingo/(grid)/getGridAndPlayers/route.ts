@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
             return rest;
         });
 
-        return NextResponse.json({ grid: gridGrid as Cell[], players: players as Player[] });
+        return NextResponse.json({ grid: gridGrid as Cell[], players: players as Player[], startWord: grid.startWord });
     } else {
         return new Response("Invalid code", { status: 400 });
     }

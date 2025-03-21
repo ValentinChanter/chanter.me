@@ -10,11 +10,12 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model bingoGrids {
-  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  grid    Json[]
-  players String[] @db.Uuid
-  code    String   @unique
-  owner   String   @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  grid      Json[]
+  players   String[] @db.Uuid
+  code      String   @unique
+  owner     String   @db.Uuid
+  startWord String
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

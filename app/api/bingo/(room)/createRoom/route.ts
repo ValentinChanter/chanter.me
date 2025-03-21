@@ -48,8 +48,9 @@ export async function POST(req: NextRequest) {
             }
         });
 
-        const grid = await createGrid();
-        if (grid instanceof Response) return grid;
+        const res = await createGrid();
+        if (res instanceof Response) return res;
+        const { grid, startWord } = res;
 
         await prisma.bingoGrids.create({
             data: {
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
                 owner: user.id,
                 players: [user.id],
                 grid,
+                startWord
             }
         });
 

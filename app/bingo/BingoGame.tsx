@@ -15,6 +15,7 @@ export default function BingoGame({ code }: { code: string }) {
 
     const [token, setToken] = useState<string | null>(null);
     const [isTokenValidating, setIsTokenValidating] = useState(true);
+    const [startWord, setStartWord] = useState("");
 
     function generateGrid() {
         fetch("/api/bingo/generateGrid", {
@@ -31,7 +32,7 @@ export default function BingoGame({ code }: { code: string }) {
         }
         ).then((data) => {
             if (data) {
-                console.log(data);
+                setStartWord(data.startWord);
                 // TODO: L'envoyer sur WebSocket
             }
         });
@@ -98,6 +99,7 @@ export default function BingoGame({ code }: { code: string }) {
                     const data = await response.json();
                     setGrid(data.grid);
                     setPlayerList(data.players);
+                    setStartWord(data.startWord);
                 }
             } catch (error) {
                 console.error("Grid or players fetch failed:", error);
@@ -168,6 +170,16 @@ export default function BingoGame({ code }: { code: string }) {
                                                 >
                                                     <span>{player.username}</span>
                                                 </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xl">Mot de départ</span>
+                                        <div className="text-center">
+                                            <a href={`https://fr.wikipedia.org/wiki/${startWord}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-words">{startWord}</a>
+                                        </div>
+                                    </div>
+                                </div>
                     </div>
                 </div>
             )}
