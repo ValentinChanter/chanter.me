@@ -16,6 +16,7 @@ export default function BingoGame({ code }: { code: string }) {
     const [token, setToken] = useState<string | null>(null);
     const [isTokenValidating, setIsTokenValidating] = useState(true);
     const [startWord, setStartWord] = useState("");
+    const [loadingGridAndPlayers, setLoadingGridAndPlayers] = useState(true);
 
     function generateGrid() {
         fetch("/api/bingo/generateGrid", {
@@ -100,6 +101,7 @@ export default function BingoGame({ code }: { code: string }) {
                     setGrid(data.grid);
                     setPlayerList(data.players);
                     setStartWord(data.startWord);
+                    setLoadingGridAndPlayers(false);
                 }
             } catch (error) {
                 console.error("Grid or players fetch failed:", error);
@@ -125,8 +127,10 @@ export default function BingoGame({ code }: { code: string }) {
             ) : (
                 <div className="flex flex-row m-auto justify-between w-full h-full px-20 py-8">
                     <div className="rounded-xl p-4 h-5/6 aspect-square my-auto dark-rectangle ">
-                        <div className="grid grid-cols-5 grid-rows-5 gap-2">
-                            {cells.length === 25 ? (
+                        <div className="grid grid-cols-5 grid-rows-5 gap-2 h-full">
+                            {loadingGridAndPlayers ? (
+                                <span className="row-span-5 col-span-5 text-center text-2xl my-auto">Chargement de la grille...</span>
+                            ) : (
                                 cells.map((cell, i) => (
                                     <div
                                         key={i}
@@ -141,21 +145,16 @@ export default function BingoGame({ code }: { code: string }) {
                                         </div>
                                     </div>
                                 )
-                            )) : (
-                                Array.from({ length: 25 }, (_, i) => (
-                                    <div key={i} className="outline outline-white/15 rounded-lg p-1 text-white overflow-y-auto no-scrollbar aspect-square text-center cursor-pointer hover:bg-gray-600 active:bg-gray-700 text-sm flex">
-                                        <div className="overflow-x-auto m-auto">
-                                            <span className="break-words">{i + 1}</span>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
+                            ))}
                         </div>
                     </div>
-                    <div className="rounded-xl p-6 flex flex-col justify-between w-1/5 h-5/6 my-auto dark-rectangle">
-                        <div>
-                            <div className="flex flex-col mb-8">
-                                <span className="text-xl">Joueurs en ligne :</span>
+                    <div className="rounded-xl p-6 w-1/5 h-5/6 my-auto dark-rectangle">
+                        {loadingGridAndPlayers ? (
+                            <div className="w-full flex flex-col justify-center h-full">
+                                <span className="text-2xl text-center break-words">Chargement des informations...</span>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col justify-between h-full">
                                 <div>
                                     <div className="flex flex-col mb-8">
                                         <span className="text-xl mb-1">{players.length} joueur{players.length === 1 ? "" : "s"} en ligne</span>
