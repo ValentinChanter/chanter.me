@@ -14,6 +14,49 @@ export function GET() {
 }
 
 export function SOCKET(
+    client: WebSocket
+) {
+    client.on("message", async (message) => {
+        let json;
+        try {
+            json = JSON.parse(message.toString());
+        } catch {
+            console.error("Invalid JSON received");
+            return;
+        }
+
+        const { action, token }: { action: string; token: string } = json;
+
+        if (!action || !token) {
+            console.error("Invalid JSON received");
+            return;
+        }
+
+        try {
+            const secret = <jwt.Secret>process.env.JWT_SECRET;
+            const decoded = <jwt.JwtPayload>jwt.verify(json.token, secret);
+    
+            if (!decoded.username || !decoded.id || !decoded.code || decoded.owner === undefined || !decoded.color) {
+                console.error("Invalid token");
+            }
+
+            // Check if player is in room
+            const res = await isPlayerInRoom(decoded.id, decoded.code);
+            if (!res) {
+                console.error("Player not in room");
+                return;
+            }
+
+            const roomCode = decoded.code as string;
+            addToRoom(roomCode, client);
+            
+            const { player, grid } = res;
+
+            switch (action) {
+                case "join":
+                    sendToAllInRoomExcept(roomCode, { action: "addPlayer", player: { publicID: player.publicID, username: player.username, color: player.color } }, client);
+                    break;
+
                 case "setCell":
                     const gridGrid = grid.grid as { word: string, colors: string[] }[];
                     const cell = json.cell as Cell;
