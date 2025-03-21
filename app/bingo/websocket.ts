@@ -78,7 +78,7 @@ export function useCells(url: () => string) {
         // Send the cell to the server
         ref.current.send(JSON.stringify({ action: 'setCell', cell, token }));
 
-        // No local updates since jwt doesn't contain the player's color, and the server will send the updated grid to everyone
+        // No local updates since the server will send the updated grid to everyone so we can set the updated grid only after checking if the user is actually allowed to check the cell
     }, []);
 
     const setGrid = useCallback((grid: Cell[]) => {
