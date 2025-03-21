@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "chanter.me - Bingo",
-  description: "Jouez au Wikirace bingo contre vos amis ! Sur liste blanche uniquement.",
+  title: "Wikirace Bingo | chanter.me",
+  description: "Créez ou rejoigner un salon pour jouer au Wikirace Bingo contre vos amis !",
 };
 
-export default function RootLayout({
+export default function BingoLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
