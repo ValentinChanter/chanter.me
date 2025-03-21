@@ -155,24 +155,19 @@ export default function BingoGame({ code }: { code: string }) {
                             <div className="flex flex-col mb-8">
                                 <span className="text-xl">Joueurs en ligne :</span>
                                 <div>
-                                    {players.map((player, i) => (
-                                        <div key={i} className="flex flex-row justify-between">
-                                            <span>{player.username}</span>
-                                            <span>{player.color}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl">Mot de départ :</span>
-                                <span>Non défini</span>
-                            </div>
-                        </div>
-                        <div>
-                            {jwtDecode<{ owner: boolean }>(getCookie("jwt") as string).owner && (
-                                <button className="dark-button py-4 w-full cursor-pointer" onClick={() => generateGrid()}>Générer une nouvelle grille</button>
-                            )}
-                        </div>
+                                    <div className="flex flex-col mb-8">
+                                        <span className="text-xl mb-1">{players.length} joueur{players.length === 1 ? "" : "s"} en ligne</span>
+                                        <div className="flex flex-row flex-wrap gap-2 justify-center">
+                                            {players.map((player, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="rounded-full px-3 py-1 w-fit text-center"
+                                                    style={{
+                                                        backgroundColor: player.color
+                                                    }}
+                                                >
+                                                    <span>{player.username}</span>
+                                                </div>
                     </div>
                 </div>
             )}
