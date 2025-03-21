@@ -135,25 +135,35 @@ export function SOCKET(
                     // Send the updated grid to all clients
                     sendToAllInRoom(roomCode, { action: "setGrid", grid: gridGrid });
                     break;
+
+                case "leave":
+                    await prisma.bingoGrids.update({
+                        where: {
+                            code: roomCode
+                        },
+                        data: {
+                            players: {
+                                set: grid.players.filter((p) => p !== player.id)
             }
         }
     });
 
-    // Periodically check for inactive connections
-    const interval = setInterval(() => {
-        for (const otherClient of server.clients as Set<ExtendedWebSocket>) {
-            if (!otherClient.isAlive) {
-                console.log("Closing inactive connection");
-                otherClient.terminate();
-            } else {
-                otherClient.isAlive = false;
-                otherClient.ping();
+                    // Send the updated player list to all clients
+                    sendToAllInRoomExcept(roomCode, { action: "removePlayer", publicID: player.publicID }, client);
+                    removeFromRoom(roomCode, client);
+                    break;
+
+                default:
+                    console.error("Invalid action");
+                    return;
             }
-        }
-    }, 30000); // Check every 30 seconds
+        } catch {
+            console.error("Invalid token");
+            return;
+            }
+    });
   
     client.on("close", () => {
-        clearInterval(interval);
         console.log("A client disconnected");
     });
 }
