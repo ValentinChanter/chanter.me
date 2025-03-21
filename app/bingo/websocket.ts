@@ -11,6 +11,7 @@ export function useCells(url: () => string) {
     const [cells, setCells] = useState<Cell[]>([]);
     const [token, setToken] = useState<string | null>(null);
     const [players, setPlayers] = useState<Player[]>([]);
+    const [startWord, setStartWord] = useState("");
 
     useEffect(() => {
         if (!token) return;
@@ -39,7 +40,7 @@ export function useCells(url: () => string) {
 
         socket.addEventListener('message', async (event) => {
             const payload = typeof event.data === 'string' ? event.data : await event.data.text();
-            const res = JSON.parse(payload) as { action: string, grid?: Cell[], publicID?: string, player?: Player };
+            const res = JSON.parse(payload) as { action: string, grid?: Cell[], publicID?: string, player?: Player, startWord?: string };
 
             switch (res.action) {
                 case 'addPlayer':
@@ -48,6 +49,11 @@ export function useCells(url: () => string) {
 
                 case 'setGrid':
                     setCells(res.grid!);
+                    break;
+
+                case 'setGridAndStartWord':
+                    setCells(res.grid!);
+                    setStartWord(res.startWord!);
                     break;
 
                 case 'removePlayer':
@@ -108,16 +114,17 @@ export function useCells(url: () => string) {
         setPlayers(players);
     }, []);
 
-    const sendGrid = useCallback((grid: Cell[], token: string) => {
+    const sendGrid = useCallback((grid: Cell[], startWord: string, token: string) => {
         if (!jwtDecode<{ owner: boolean }>(token).owner) return;
 
         if (!ref.current || ref.current.readyState !== ref.current.OPEN) return;
 
-        ref.current.send(JSON.stringify({ action: 'setGrid', grid, token }));
+        ref.current.send(JSON.stringify({ action: 'setGridAndStartWord', grid, startWord, token }));
 
         // Send to others and set it locally (the owner will see the changes a few ms earlier but we save some bandwidth)
         setGrid(grid);
-    }, [setGrid]);
+        setStartWord(startWord);
+    }, [setGrid, setStartWord]);
 
-    return [cells, setGrid, sendCell, updateToken, players, setPlayerList, sendGrid] as const;
+    return [cells, setGrid, sendCell, setToken, players, setPlayerList, sendGrid, startWord, setStartWord, token] as const;
 }
