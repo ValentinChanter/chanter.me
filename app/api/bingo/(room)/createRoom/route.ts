@@ -5,7 +5,7 @@ import * as jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 import { CONFIG } from "@/config/bingo";
-import createGrid from '../_shared/createGrid';
+import createGrid from '../../_shared/createGrid';
 
 const prisma = new PrismaClient();
 
@@ -15,7 +15,13 @@ function genCode() {
 }
 
 export async function POST(req: NextRequest) {
-    const body = await req.json();
+    let body;
+    try {
+        body = await req.json();
+    } catch {
+        return new Response("Invalid JSON body", { status: 400 });
+    }
+    
     const { username, token } = body;
 
     if (!username || !token) {
@@ -32,12 +38,13 @@ export async function POST(req: NextRequest) {
             code = genCode();
         }
 
+        const ownerColor = CONFIG.colors.find((color) => color.name === "Violet")?.hex as string; // TODO: Add default color in options before creation
         const user = await prisma.bingoPlayers.create({
             data: {
                 publicID,
                 username,
                 roomCode: code,
-                color: CONFIG.colors.find((color) => color.name === "Violet")?.hex || "",
+                color: ownerColor,
             }
         });
 
@@ -54,7 +61,7 @@ export async function POST(req: NextRequest) {
         });
 
         const secret = <jwt.Secret> process.env.JWT_SECRET;
-        const token = jwt.sign({ username, id: publicID, code, owner: true }, secret);
+        const token = jwt.sign({ username, id: publicID, code, owner: true, color: ownerColor }, secret);
 
         return NextResponse.json({ token });
     } else {
