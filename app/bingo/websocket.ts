@@ -44,7 +44,13 @@ export function useCells(url: () => string) {
 
             switch (res.action) {
                 case 'addPlayer':
-                    setPlayers((prev) => [...prev, res.player!]);
+                    // Check if the player is already in the list
+                    setPlayers((prev) => {
+                        if (prev.some((p) => p.publicID === res.player!.publicID)) {
+                            return prev;
+                        }
+                        return [...prev, res.player!];
+                    });
                     break;
 
                 case 'setGrid':
