@@ -19,8 +19,18 @@ export function useCells(url: () => string) {
         ref.current = socket;
 
         const controller = new AbortController();
+        let heartbeatInterval: NodeJS.Timeout;
+
+        const sendHeartbeat = () => {
+            if (ref.current && ref.current.readyState === WebSocket.OPEN) {
+                ref.current.send(JSON.stringify({ action: 'ping' }));
+            }
+        };
 
         socket.addEventListener('open', () => {
+            // Start heartbeat
+            heartbeatInterval = setInterval(sendHeartbeat, 30000); // Send heartbeat every 30 seconds
+
             // Tell the server I just joined for others
             if (ref.current && ref.current.readyState === ref.current.OPEN) {
                 ref.current.send(JSON.stringify({ action: 'join', token }));
@@ -44,6 +54,9 @@ export function useCells(url: () => string) {
                     setPlayers((prev) => prev.filter((p) => p.publicID !== res.publicID));
                     break;
 
+                case 'pong':
+                    break;
+
                 default:
                     console.error('Invalid action:', res.action);
                     break;
@@ -55,6 +68,7 @@ export function useCells(url: () => string) {
         }, controller);
 
         socket.addEventListener('close', (event) => {
+            clearInterval(heartbeatInterval);
             if (event.wasClean) return;
             console.error('WebSocket closed and was not clean:', event);
         }, controller);
@@ -65,6 +79,7 @@ export function useCells(url: () => string) {
                 ref.current.send(JSON.stringify({ action: 'leave', token }));
             }
 
+            clearInterval(heartbeatInterval);
             controller.abort();
             ref.current?.close();
         };
@@ -94,7 +109,7 @@ export function useCells(url: () => string) {
     }, []);
 
     const sendGrid = useCallback((grid: Cell[], token: string) => {
-        if (!jwtDecode<{ owner: boolean }>(token).owner) return
+        if (!jwtDecode<{ owner: boolean }>(token).owner) return;
 
         if (!ref.current || ref.current.readyState !== ref.current.OPEN) return;
 
