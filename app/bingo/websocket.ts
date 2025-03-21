@@ -23,7 +23,7 @@ export function useCells(url: () => string) {
 
         const sendHeartbeat = () => {
             if (ref.current && ref.current.readyState === WebSocket.OPEN) {
-                ref.current.send(JSON.stringify({ action: 'ping' }));
+                ref.current.send(JSON.stringify({ action: 'ping', token }));
             }
         };
 
