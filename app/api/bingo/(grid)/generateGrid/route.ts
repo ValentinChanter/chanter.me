@@ -27,7 +27,13 @@ function initGrid(words: string[]) {
 }
 
 export async function POST(req: NextRequest) {
-    const body = await req.json();
+    let body;
+    try {
+        body = await req.json();
+    } catch {
+        return new Response("Invalid JSON body", { status: 400 });
+    }
+
     const { token } = body;
 
     try {
@@ -113,8 +119,8 @@ export async function POST(req: NextRequest) {
                     }
                 });
 
-                // Write code in user's jwt
-                const newToken = jwt.sign({ username: decoded.username, uuid: decoded.uuid, code }, secret);
+                // Write code in user's jwt (TODO: Remove? This doesn't make much sense anymore without logins)
+                const newToken = jwt.sign({ username: decoded.username, id: decoded.uuid, code, owner: true, color: decoded.color }, secret);
 
                 return NextResponse.json({ words, token: newToken });
             } else {
