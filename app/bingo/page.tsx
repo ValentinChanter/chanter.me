@@ -138,11 +138,11 @@ function Bingo() {
                     </div>
                     <div className="flex flex-col space-y-2 my-8">
                         <label htmlFor="joinUsername">Nom d&apos;utilisateur</label>
-                        <input required id="joinUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setUsername(e.target.value)}></input>
+                        <input disabled={joinLoading} required id="joinUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setUsername(e.target.value)}></input>
                     </div>
                     <div className="flex flex-col space-y-2 mb-4">
                         <label htmlFor="code">Code du salon</label>
-                        <input required id="code" type="text" pattern="[A-Z0-9]{4}" title="Veuillez entrer exactement 4 caractères alphanumériques." value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setCode(e.target.value.toUpperCase())}></input>
+                        <input disabled={joinLoading} required id="code" type="text" pattern="[A-Z0-9]{4}" title="Veuillez entrer exactement 4 caractères alphanumériques." value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setCode(e.target.value.toUpperCase())}></input>
                     </div>
                     {joinError && (
                         <span className="text-red-500">{joinError}</span>
@@ -159,11 +159,11 @@ function Bingo() {
                     </div>
                     <div className="flex flex-col space-y-2 my-8">
                         <label htmlFor="createUsername">Nom d&apos;utilisateur</label>
-                        <input required id="createUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setUsername(e.target.value)}></input>
+                        <input disabled={createLoading} required id="createUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setUsername(e.target.value)}></input>
                     </div>
                     <div className="flex flex-col space-y-2 mb-4">
                         <label htmlFor="token">Jeton d&apos;authentification</label>
-                        <input required id="token" type="password" value={token} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setToken(e.target.value)}></input>
+                        <input disabled={createLoading} required id="token" type="password" value={token} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setToken(e.target.value)}></input>
                     </div>
                     {createError && (
                         <span className="text-red-500">{createError}</span>
