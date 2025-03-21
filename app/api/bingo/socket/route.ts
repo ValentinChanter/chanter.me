@@ -109,7 +109,7 @@ export function SOCKET(
                         return;
                     }
 
-                    const word = gridGrid.find((c) => c.word === cell.word) as { word: string, colors: string[] };
+                    const word = gridGrid.find((c) => c.word === cell.word) as Cell;
 
                     if (true && word.colors.length > 0 && decoded.color !== word.colors[0]) { // TODO: Check that mode is lockout // If it's lockout, cell is already checked and not by the player
                         console.error("Word already checked");
