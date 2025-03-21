@@ -170,38 +170,6 @@ export function SOCKET(
                     }
                     break;
 
-                case "leave":
-                    const gridAfterLeave = await prisma.bingoGrids.update({
-                        where: {
-                            code: roomCode
-                        },
-                        data: {
-                            players: {
-                                set: grid.players.filter((p) => p !== player.id)
-                            }
-                        }
-                    });
-
-                    // If nobody is left in the room, delete it and all users associated with it
-                    if (gridAfterLeave.players.length === 0) {
-                        await prisma.bingoGrids.delete({
-                            where: {
-                                code: roomCode
-                            }
-                        });
-
-                        await prisma.bingoPlayers.deleteMany({
-                            where: {
-                                roomCode
-                            }
-                        });
-                    }
-
-                    // Send the updated player list to all clients
-                    sendToAllInRoomExcept(roomCode, { action: "removePlayer", publicID: player.publicID }, client);
-                    removeFromRoom(roomCode, client);
-                    break;
-
                 default:
                     console.error("Invalid action");
                     return;
@@ -212,7 +180,55 @@ export function SOCKET(
         }
     });
   
-    client.on("close", () => {
-        console.log("A client disconnected");
+    client.on("close", async () => {
+        const res = getInfoFromClient(client);
+        if (!res) return console.error("Client not in room");
+        const { publicID, roomCode } = res;
+
+        const grid = await prisma.bingoGrids.findUnique({
+            where: {
+                code: roomCode
+            }
+        });
+
+        if (!grid) return console.error("Room not found");
+
+        const playerToRemove = await prisma.bingoPlayers.findUnique({
+            where: {
+                roomCode,
+                publicID
+            }
+        });
+
+        if (!playerToRemove) return console.error("Player to remove not found");
+
+        const gridAfterLeave = await prisma.bingoGrids.update({
+            where: {
+                code: roomCode
+            },
+            data: {
+                players: {
+                    set: grid.players.filter((p) => p !== playerToRemove.id)
+                }
+            }
+        });
+
+        // If nobody is left in the room, delete it and all users associated with it
+        if (gridAfterLeave.players.length === 0) {
+            await prisma.bingoGrids.delete({
+                where: {
+                    code: roomCode
+                }
+            });
+
+            await prisma.bingoPlayers.deleteMany({
+                where: {
+                    roomCode
+                }
+            });
+        }
+
+        sendToAllInRoom(roomCode, { action: "removePlayer", publicID: publicID });
+        removeFromRoom(roomCode, client);
     });
 }

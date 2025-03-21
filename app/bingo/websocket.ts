@@ -86,11 +86,6 @@ export function useCells(url: () => string) {
         }, controller);
 
         return () => {
-            // Before closing, tell the server who I am so it can remove me from the player list
-            if (ref.current && ref.current.readyState === ref.current.OPEN) {
-                ref.current.send(JSON.stringify({ action: 'leave', token }));
-            }
-
             clearInterval(heartbeatInterval);
             controller.abort();
             ref.current?.close();
