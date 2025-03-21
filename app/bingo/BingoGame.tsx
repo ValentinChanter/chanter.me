@@ -136,7 +136,7 @@ export default function BingoGame({ code }: { code: string }) {
                                         key={i}
                                         className="outline outline-white/15 rounded-lg p-1 text-white overflow-y-auto no-scrollbar aspect-square text-center cursor-pointer hover:bg-gray-600 active:bg-gray-700 text-sm flex"
                                         style={{
-                                            backgroundColor: cell.colors.length > 0  ? cell.colors[0] : "transparent"
+                                            backgroundColor: cell.colors.length > 0  ? cell.colors[0] : ""
                                         }}
                                         onClick={() => sendCell(cell, getCookie("jwt") as string)}
                                     >
