@@ -56,6 +56,49 @@ function Bingo() {
     }
 
     function joinRoom(e: FormEvent) {
+        setJoinLoading(true);
+        const params: { method: string; headers: Record<string, string>; body: string } = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, code }),
+        };
+
+        if (hasCookie("jwt")) {
+            params.headers["Authorization"] = `Bearer ${getCookie("jwt")}`;
+        }
+
+        fetch("/api/bingo/joinRoom", params)
+        .then((res) => {
+            if (res.ok) {
+                return res.json();
+            } else {
+                switch (res.status) {
+                    case 400:
+                        setJoinError("Paramètres manquants ou erronés. Veuillez réessayer.");
+                        break;
+
+                    case 422:
+                        setJoinError(`Le salon ${code} n'existe pas. Veuillez réessayer.`);
+                        break;
+
+                    default:
+                        setJoinError("Une erreur inconnue s'est produite. Veuillez réessayer.");
+                        break;
+                }
+
+                setJoinLoading(false);
+            }
+        }).then((data) => {
+            if (data) {
+                const decoded = jwtDecode<{ username: string, id: string, code: string }>(data.token);
+                setCookie('jwt', data.token);
+
+                router.push(`/bingo/${decoded.code}`);
+            }
+        });
+
         e.preventDefault();
     }
 
