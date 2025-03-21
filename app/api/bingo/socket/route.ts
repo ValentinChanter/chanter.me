@@ -14,20 +14,42 @@ export function GET() {
 }
 
 export function SOCKET(
-    client: ExtendedWebSocket,
-    _request: IncomingMessage,
-    server: WebSocketServer
-) {
-    client.isAlive = true;
+                case "setCell":
+                    const gridGrid = grid.grid as { word: string, colors: string[] }[];
+                    const cell = json.cell as Cell;
 
-    client.on("pong", () => {
-        client.isAlive = true; // Reset the heartbeat on receiving a pong
-    });
+                    // Check if the word is in the grid
+                    if (!gridGrid.some((c) => c.word === cell.word)) {
+                        console.error("Word not in grid");
+                        return;
+                    }
 
-    client.on("message", (message) => {
-        for (const otherClient of server.clients) {
-            if (otherClient !== client && otherClient.readyState === otherClient.OPEN) {
-                otherClient.send(message);
+                    const word = gridGrid.find((c) => c.word === cell.word) as { word: string, colors: string[] };
+
+                    if (true && word.colors.length > 0 && decoded.color !== word.colors[0]) { // TODO: Check that mode is lockout // If it's lockout, cell is already checked and not by the player
+                        console.error("Word already checked");
+                        return;
+                    }
+
+                    // Add the player's color to the word, or remove it if it's already there
+                    if (word.colors.includes(player.color)) {
+                        word.colors = word.colors.filter((c) => c !== player.color);
+                    } else {
+                        word.colors.push(player.color);
+                    }
+                    
+                    await prisma.bingoGrids.update({
+                        where: {
+                            code: roomCode
+                        },
+                        data: {
+                            grid: gridGrid
+                        }
+                    });
+
+                    // Send the updated grid to all clients
+                    sendToAllInRoom(roomCode, { action: "setGrid", grid: gridGrid });
+                    break;
             }
         }
     });
