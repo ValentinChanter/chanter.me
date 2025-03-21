@@ -106,10 +106,6 @@ export function useCells(url: () => string) {
         setCells(grid);
     }, []);
 
-    const updateToken = useCallback((newToken: string | null) => {
-        setToken(newToken);
-    }, []);
-
     const setPlayerList = useCallback((players: Player[]) => {
         setPlayers(players);
     }, []);
