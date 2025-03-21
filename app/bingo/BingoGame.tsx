@@ -13,9 +13,7 @@ export default function BingoGame({ code }: { code: string }) {
     const setCookie = useSetCookie();
     const router = useRouter();
 
-    const [token, setToken] = useState<string | null>(null);
     const [isTokenValidating, setIsTokenValidating] = useState(true);
-    const [startWord, setStartWord] = useState("");
     const [loadingGridAndPlayers, setLoadingGridAndPlayers] = useState(true);
 
     function generateGrid() {
@@ -33,14 +31,13 @@ export default function BingoGame({ code }: { code: string }) {
         }
         ).then((data) => {
             if (data) {
-                setStartWord(data.startWord);
-                sendGrid(data.grid, getCookie("jwt") as string);
+                sendGrid(data.grid, data.startWord, getCookie("jwt") as string);
             }
         });
     }
 
     // WebSocket setup
-    const [cells, setGrid, sendCell, updateToken, players, setPlayerList, sendGrid] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
+    const [cells, setGrid, sendCell, setToken, players, setPlayerList, sendGrid, startWord, setStartWord, token] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
 
     useEffect(() => {
         // The token will stay undefined until loaded (then it will be true/false)
@@ -70,6 +67,7 @@ export default function BingoGame({ code }: { code: string }) {
                 if (data.token) {
                     setCookie("jwt", data.token);
                 }
+                
                 setToken(getCookie("jwt") as string);
                 setIsTokenValidating(false);
             } catch (error) {

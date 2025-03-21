@@ -140,12 +140,13 @@ export function SOCKET(
                     sendToAllInRoom(roomCode, { action: "setGrid", grid: gridGrid });
                     break;
 
-                case "setGrid":
+                case "setGridAndStartWord":
                     const newGrid = json.grid as Cell[];
+                    const startWord = json.startWord as string;
 
                     // Check if the requestee is the owner
                     if (decoded.owner) {
-                        sendToAllInRoomExcept(roomCode, { action: "setGrid", grid: newGrid }, client);
+                        sendToAllInRoomExcept(roomCode, { action: "setGridAndStartWord", grid: newGrid, startWord }, client);
                     }
                     break;
 
