@@ -7,18 +7,9 @@ import { createUserAndAddToGrid } from '../_shared/createUserAndAddToGrid';
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
-    const body = await req.json();
-    const { code } = body;
-
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return new Response("Authorization header missing or malformed", { status: 400 });
-    }
-    const token = authHeader.split(" ")[1];
-
-    try {
-        const secret = <jwt.Secret> process.env.JWT_SECRET;
-        const decoded = <jwt.JwtPayload> jwt.verify(token, secret);
+    const res = await extractCodeAndDecodedTokenFromBody(req);
+    if (res instanceof Response) return res;
+    const { code, decoded } = res;
 
         const grid = await prisma.bingoGrids.findFirst({
             where: {
