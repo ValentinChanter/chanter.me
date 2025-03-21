@@ -1,10 +1,52 @@
-import { WebSocket, WebSocketServer } from "ws";
+import { WebSocket } from "ws";
+import { PrismaClient } from "@prisma/client";
 
-// Extend the WebSocket type to include the isAlive property
-interface ExtendedWebSocket extends WebSocket {
-    isAlive: boolean;
+import * as jwt from "jsonwebtoken";
+
+import { Cell } from "../../../bingo/types";
+import { isPlayerInRoom } from "../_shared/isPlayerInRoom";
+
+const prisma = new PrismaClient();
+
+const rooms: Map<string, Set<WebSocket>> = new Map();
+
+function addToRoom(roomCode: string, client: WebSocket) {
+    if (!rooms.has(roomCode)) {
+        rooms.set(roomCode, new Set());
+    }
+    rooms.get(roomCode)?.add(client);
 }
-import { IncomingMessage } from "node:http";
+
+function removeFromRoom(roomCode: string, client: WebSocket) {
+    rooms.get(roomCode)?.delete(client);
+    if (rooms.get(roomCode)?.size === 0) {
+        rooms.delete(roomCode);
+    }
+}
+
+function sendToAllInRoom(roomCode: string, message: object) {
+    const clientsInRoom = rooms.get(roomCode);
+    if (!clientsInRoom) return;
+
+    const rawData: WebSocket.RawData = Buffer.from(JSON.stringify(message));
+    for (const client of clientsInRoom) {
+        if (client.readyState === client.OPEN) {
+            client.send(rawData);
+}
+    }
+}
+
+function sendToAllInRoomExcept(roomCode: string, message: object, except: WebSocket) {
+    const clientsInRoom = rooms.get(roomCode);
+    if (!clientsInRoom) return;
+
+    const rawData: WebSocket.RawData = Buffer.from(JSON.stringify(message));
+    for (const client of clientsInRoom) {
+        if (client !== except && client.readyState === client.OPEN) {
+            client.send(rawData);
+        }
+    }
+}
 
 export function GET() {
     const headers = new Headers();
