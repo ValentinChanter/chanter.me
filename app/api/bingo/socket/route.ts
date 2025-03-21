@@ -136,6 +136,15 @@ export function SOCKET(
                     sendToAllInRoom(roomCode, { action: "setGrid", grid: gridGrid });
                     break;
 
+                case "setGrid":
+                    const newGrid = json.grid as Cell[];
+
+                    // Check if the requestee is the owner
+                    if (decoded.owner) {
+                        sendToAllInRoomExcept(roomCode, { action: "setGrid", grid: newGrid }, client);
+                    }
+                    break;
+
                 case "leave":
                     await prisma.bingoGrids.update({
                         where: {

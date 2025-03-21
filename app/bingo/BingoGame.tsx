@@ -33,13 +33,13 @@ export default function BingoGame({ code }: { code: string }) {
         ).then((data) => {
             if (data) {
                 setStartWord(data.startWord);
-                // TODO: L'envoyer sur WebSocket
+                sendGrid(data.grid, getCookie("jwt") as string);
             }
         });
     }
 
     // WebSocket setup
-    const [cells, setGrid, sendCell, updateToken, players, setPlayerList] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
+    const [cells, setGrid, sendCell, updateToken, players, setPlayerList, sendGrid] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
 
     useEffect(() => {
         // The token will stay undefined until loaded (then it will be true/false)
@@ -180,6 +180,13 @@ export default function BingoGame({ code }: { code: string }) {
                                         </div>
                                     </div>
                                 </div>
+                                <div>
+                                    {jwtDecode<{ owner: boolean }>(getCookie("jwt") as string).owner && (
+                                        <button className="dark-button py-4 w-full cursor-pointer" onClick={() => generateGrid()}>Générer une nouvelle grille</button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
