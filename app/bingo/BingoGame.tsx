@@ -5,7 +5,7 @@ import { useGetCookie, useHasCookie, useSetCookie } from 'cookies-next/client';
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
-import { useCells } from "../api/bingo/socket/websocket";
+import { useCells } from "./websocket";
 
 export default function BingoGame({ code }: { code: string }) {
     const hasCookie = useHasCookie();
@@ -13,7 +13,8 @@ export default function BingoGame({ code }: { code: string }) {
     const setCookie = useSetCookie();
     const router = useRouter();
 
-    const [receivedNewToken, setReceivedNewToken] = useState(false);
+    const [token, setToken] = useState<string | null>(null);
+    const [isTokenValidating, setIsTokenValidating] = useState(true);
 
     function generateGrid() {
         fetch("/api/bingo/generateGrid", {
@@ -50,12 +51,12 @@ export default function BingoGame({ code }: { code: string }) {
         const validateToken = async () => {
             try {
                 const response = await fetch(`/api/bingo/checkToken`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${getCookie("jwt")}`,
-                },
-                body: JSON.stringify({ code }),
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${getCookie("jwt")}`,
+                    },
+                    body: JSON.stringify({ code }),
                 });
     
                 if (!response.ok) {
@@ -72,7 +73,7 @@ export default function BingoGame({ code }: { code: string }) {
             } catch (error) {
                 console.error("Token validation failed:", error);
                 setIsTokenValidating(false);
-                }
+            }
         };
     
         validateToken();
@@ -97,7 +98,7 @@ export default function BingoGame({ code }: { code: string }) {
                     const data = await response.json();
                     setGrid(data.grid);
                     setPlayerList(data.players);
-        }
+                }
             } catch (error) {
                 console.error("Grid or players fetch failed:", error);
             }
@@ -153,7 +154,14 @@ export default function BingoGame({ code }: { code: string }) {
                         <div>
                             <div className="flex flex-col mb-8">
                                 <span className="text-xl">Joueurs en ligne :</span>
-                                <span>test</span>
+                                <div>
+                                    {players.map((player, i) => (
+                                        <div key={i} className="flex flex-row justify-between">
+                                            <span>{player.username}</span>
+                                            <span>{player.color}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-xl">Mot de départ :</span>
