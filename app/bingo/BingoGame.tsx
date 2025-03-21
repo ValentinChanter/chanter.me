@@ -173,7 +173,7 @@ export default function BingoGame({ code }: { code: string }) {
                                     <div className="flex flex-col">
                                         <span className="text-xl">Mot de départ</span>
                                         <div className="text-center">
-                                            <a href={`https://fr.wikipedia.org/wiki/${startWord}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-words">{startWord}</a>
+                                            <a href={`https://fr.wikipedia.org/wiki/${startWord}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-words">{startWord.replace(/_/g, " ")}</a>
                                         </div>
                                     </div>
                                 </div>
