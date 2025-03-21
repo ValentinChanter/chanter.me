@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "chanter.me - Home",
+  title: "Home | chanter.me",
   description: "Not a website about music. Just a bunch of stuff I did during my free time, nothing to see here but you can try to find some routes.",
 };
 
