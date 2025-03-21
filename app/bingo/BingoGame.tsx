@@ -37,7 +37,7 @@ export default function BingoGame({ code }: { code: string }) {
     }
 
     // WebSocket setup
-    const [cells] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
+    const [cells, setGrid, sendCell, updateToken, players, setPlayerList] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
 
     useEffect(() => {
         // The token will stay undefined until loaded (then it will be true/false)
