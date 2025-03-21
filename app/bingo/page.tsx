@@ -22,6 +22,11 @@ function Bingo() {
     const hasCookie = useHasCookie();
 
     function createRoom(e: FormEvent) {
+        if (!username || !token) {
+            setCreateError("Veuillez remplir tous les champs.");
+            return;
+        }
+
         setCreateLoading(true);
         fetch("/api/bingo/createRoom", {
             method: "POST",
@@ -62,6 +67,16 @@ function Bingo() {
     }
 
     function joinRoom(e: FormEvent) {
+        if (!code || !username) {
+            setJoinError("Veuillez remplir tous les champs.");
+            return;
+        }
+
+        if (code.length !== 4) {
+            setJoinError("Le code du salon doit contenir exactement 4 caractères.");
+            return;
+        }
+
         setJoinLoading(true);
         const params: { method: string; headers: Record<string, string>; body: string } = {
             method: "POST",
@@ -127,7 +142,7 @@ function Bingo() {
                     </div>
                     <div className="flex flex-col space-y-2 mb-4">
                         <label htmlFor="code">Code du salon</label>
-                        <input required id="code" type="text" value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setCode(e.target.value.toUpperCase())}></input>
+                        <input required id="code" type="text" pattern="[A-Z0-9]{4}" title="Veuillez entrer exactement 4 caractères alphanumériques." value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setCode(e.target.value.toUpperCase())}></input>
                     </div>
                     {joinError && (
                         <span className="text-red-500">{joinError}</span>
