@@ -2,46 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from "@prisma/client";
 
 import * as jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { createUserAndAddToGrid } from '../_shared/createUserAndAddToGrid';
 
 const prisma = new PrismaClient();
-
-async function createUserAndAddToGrid(code: string, decoded: jwt.JwtPayload) {
-    console.log("creating user and adding to grid");
-
-    const newID = uuidv4();
-
-    const user = await prisma.bingoPlayers.create({
-        data: {
-            publicID: newID,
-            username: decoded.username,
-            roomCode: code,
-            color: "#ba2f2f" // TODO: récupérer la prochaine couleur disponible
-        }
-    });
-
-    console.log("added user to grid");
-
-    await prisma.bingoGrids.update({
-        where: {
-            code
-        },
-        data: {
-            players: {
-                push: user.id
-            }
-        }
-    });
-
-    console.log("updated grid");
-
-    const secret = <jwt.Secret> process.env.JWT_SECRET;
-    const newToken = jwt.sign({ username: decoded.username, id: newID, code, owner: false }, secret);
-
-    console.log("new token", newToken);
-
-    return newToken;
-}
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -76,7 +39,7 @@ export async function POST(req: NextRequest) {
 
         if (!player) {
             // Provided public ID doesn't match any player in the history of players in this room
-            const newToken = await createUserAndAddToGrid(code, decoded);
+        const newToken = await createUserAndAddToGrid(code, decoded.username);
             return NextResponse.json({ token: newToken });
         }
 
