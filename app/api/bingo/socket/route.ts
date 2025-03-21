@@ -8,44 +8,65 @@ import { isPlayerInRoom } from "../_shared/isPlayerInRoom";
 
 const prisma = new PrismaClient();
 
-const rooms: Map<string, Set<WebSocket>> = new Map();
+const rooms: Map<string, Set<{client: WebSocket, publicID: string}>> = new Map();
 
-function addToRoom(roomCode: string, client: WebSocket) {
+function addToRoom(roomCode: string, client: WebSocket, publicID: string) {
     if (!rooms.has(roomCode)) {
         rooms.set(roomCode, new Set());
     }
-    rooms.get(roomCode)?.add(client);
+    rooms.get(roomCode)?.add({ client, publicID });
 }
 
-function removeFromRoom(roomCode: string, client: WebSocket) {
-    rooms.get(roomCode)?.delete(client);
+function removeFromRoom(roomCode: string, uniqueIdentifier: WebSocket | string) {
+    if (typeof uniqueIdentifier === "string") {
+        const publicID = uniqueIdentifier;
+        const client = Array.from(rooms.get(roomCode) || []).find((c) => c.publicID === publicID)?.client as WebSocket;
+        rooms.get(roomCode)?.delete({ client, publicID });
+    } else {
+        const client = uniqueIdentifier;
+        const publicID = Array.from(rooms.get(roomCode) || []).find((c) => c.client === client)?.publicID as string;
+        rooms.get(roomCode)?.delete({ client, publicID });
+    }
+
     if (rooms.get(roomCode)?.size === 0) {
         rooms.delete(roomCode);
     }
 }
 
 function sendToAllInRoom(roomCode: string, message: object) {
-    const clientsInRoom = rooms.get(roomCode);
-    if (!clientsInRoom) return;
+    const setsInRoom = rooms.get(roomCode);
+    if (!setsInRoom) return;
 
     const rawData: WebSocket.RawData = Buffer.from(JSON.stringify(message));
-    for (const client of clientsInRoom) {
-        if (client.readyState === client.OPEN) {
-            client.send(rawData);
+    for (const set of setsInRoom) {
+        if (set.client.readyState === set.client.OPEN) {
+            set.client.send(rawData);
         }
     }
 }
 
 function sendToAllInRoomExcept(roomCode: string, message: object, except: WebSocket) {
-    const clientsInRoom = rooms.get(roomCode);
-    if (!clientsInRoom) return;
+    const setsInRoom = rooms.get(roomCode);
+    if (!setsInRoom) return;
 
     const rawData: WebSocket.RawData = Buffer.from(JSON.stringify(message));
-    for (const client of clientsInRoom) {
-        if (client !== except && client.readyState === client.OPEN) {
-            client.send(rawData);
+    for (const set of setsInRoom) {
+        if (set.client !== except && set.client.readyState === set.client.OPEN) {
+            set.client.send(rawData);
         }
     }
+}
+
+function getInfoFromClient(client: WebSocket) {
+    for (const [roomCode, set] of rooms) {
+        for (const entry of set) {
+            if (entry.client === client) {
+                return { publicID: entry.publicID, roomCode };
+            }
+        }
+    }
+
+    return null;
 }
 
 export function GET() {
@@ -89,10 +110,9 @@ export function SOCKET(
                 return;
             }
 
-            const roomCode = decoded.code as string;
-            addToRoom(roomCode, client);
-            
+            const roomCode = decoded.code as string;            
             const { player, grid } = res;
+            addToRoom(roomCode, client, player.publicID);
 
             switch (action) {
                 case "ping":
