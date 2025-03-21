@@ -109,15 +109,6 @@ export default function BingoGame({ code }: { code: string }) {
         fetchGrid();
     }, [token, isTokenValidating, code, setGrid, setPlayerList]);
 
-    // Refresh token on mount
-    useEffect(() => {
-        if (hasCookie("jwt")) {
-            updateToken(getCookie("jwt") as string);
-        } else {
-            updateToken(null);
-        }
-    }, [hasCookie, getCookie, updateToken]);
-
     return (
         <div className='flex h-screen'>
             {!hasCookie("jwt") || jwtDecode<{ code: string }>(getCookie("jwt") as string).code !== code ? (
