@@ -96,10 +96,8 @@ export async function POST(req: NextRequest) {
                 }
             });
 
-            const newToken = jwt.sign({ username: player.username, id: player.publicID, code, owner: grid.owner === player.id }, secret);
+        const secret = <jwt.Secret> process.env.JWT_SECRET;
+        const newToken = jwt.sign({ username: player.username, id: player.publicID, code, owner: grid.owner === player.id, color: player.color }, secret);
             return NextResponse.json({ token: newToken });
-        }
-    } catch {
-        return new Response("Invalid token", { status: 400 });
     }
 }
