@@ -2,7 +2,13 @@ import { NextRequest } from "next/server";
 import * as jwt from "jsonwebtoken";
 
 export async function POST(req: NextRequest) {
-    const body = await req.json();
+    let body;
+    try {
+        body = await req.json();
+    } catch {
+        return new Response("Invalid JSON body", { status: 400 });
+    }
+    
     const { token } = body;
 
     try {
