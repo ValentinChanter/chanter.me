@@ -127,7 +127,7 @@ function Bingo() {
                     </div>
                     <div className="flex flex-col space-y-2 mb-4">
                         <label htmlFor="code">Code du salon</label>
-                        <input required id="code" type="text" value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setCode(e.target.value)}></input>
+                        <input required id="code" type="text" value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10" onChange={(e) => setCode(e.target.value.toUpperCase())}></input>
                     </div>
                     {joinError && (
                         <span className="text-red-500">{joinError}</span>
