@@ -40,39 +40,43 @@ export default function BingoGame({ code }: { code: string }) {
     const [cells] = useCells(() => `ws${process.env.NODE_ENV === "production" ? "s" : ""}://${window.location.host}/api/bingo/socket`);
 
     useEffect(() => {
-        // Now it's called twice after the token is received
-
-        // useEffect is fired twice without token on a normal use-case, then once with a token
-        if (hasCookie("jwt")) {
-            console.log(getCookie("jwt"));
-            fetch(`/api/bingo/checkToken`, {
+        // The token will stay undefined until loaded (then it will be true/false)
+        // After the page is loaded (i.e. the token is loaded), we can start verifying it
+        if (hasCookie("jwt") === undefined) {
+            setIsTokenValidating(false);
+            return;
+        }
+    
+        const validateToken = async () => {
+            try {
+                const response = await fetch(`/api/bingo/checkToken`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${getCookie("jwt")}`,
                 },
                 body: JSON.stringify({ code }),
-            }).then((res) => {
-                if (res.ok) {
-                    return res.json();
-                } else {
+                });
+    
+                if (!response.ok) {
                     router.push(`/bingo?code=${code}`);
+                    return;
                 }
-            }).then((data) => {
-                if (data) {
-                    if (data.token) setCookie("jwt", data.token);
-                    if (!receivedNewToken) setReceivedNewToken(true); // Refresh useEffect to make the page render
-
-                    // TODO: Récupérer la grille
+    
+                const data = await response.json();
+                if (data.token) {
+                    setCookie("jwt", data.token);
                 }
-            });
-        } else {
-            // If a user is lost without a token, redirect him to the home page
-            // We don't want to redirect during those two first useEffect calls
-            // We use a trick with a timeout to avoid this
-            const timeout = setTimeout(() => {
-                if (!hasCookie("jwt")) {
-                    router.push(`/bingo?code=${code}`);
+                setToken(getCookie("jwt") as string);
+                setIsTokenValidating(false);
+            } catch (error) {
+                console.error("Token validation failed:", error);
+                setIsTokenValidating(false);
+                }
+        };
+    
+        validateToken();
+    }, [hasCookie, getCookie, setCookie, router, code]);
                 }
             }, 1);
 
