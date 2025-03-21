@@ -161,7 +161,7 @@ export default function BingoGame({ code }: { code: string }) {
                             </div>
                         </div>
                         <div>
-                            {jwtDecode<{ username: string, id: string, code: string,owner: boolean }>(getCookie("jwt") as string).owner && (
+                            {jwtDecode<{ owner: boolean }>(getCookie("jwt") as string).owner && (
                                 <button className="dark-button py-4 w-full cursor-pointer" onClick={() => generateGrid()}>Générer une nouvelle grille</button>
                             )}
                         </div>
