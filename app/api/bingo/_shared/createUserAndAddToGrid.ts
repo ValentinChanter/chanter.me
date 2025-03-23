@@ -29,7 +29,7 @@ export async function createUserAndAddToGrid(code: string, username: string) {
         }
     });
 
-    await prisma.bingoGrids.update({
+    await prisma.bingoRooms.update({
         where: {
             code
         },

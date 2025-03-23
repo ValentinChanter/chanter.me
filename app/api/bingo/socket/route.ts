@@ -111,7 +111,7 @@ export function SOCKET(
             }
 
             const roomCode = decoded.code as string;            
-            const { player, grid } = res;
+            const { player, room } = res;
             addToRoom(roomCode, client, player.publicID);
 
             switch (action) {
@@ -124,16 +124,16 @@ export function SOCKET(
                     break;
 
                 case "setCell":
-                    const gridGrid = grid.grid as { word: string, colors: string[] }[];
+                    const grid = room.grid as { word: string, colors: string[], description: string }[];
                     const cell = json.cell as Cell;
 
                     // Check if the word is in the grid
-                    if (!gridGrid.some((c) => c.word === cell.word)) {
+                    if (!grid.some((c) => c.word === cell.word)) {
                         console.error("Word not in grid");
                         return;
                     }
 
-                    const word = gridGrid.find((c) => c.word === cell.word) as Cell;
+                    const word = grid.find((c) => c.word === cell.word) as Cell;
 
                     if (true && word.colors.length > 0 && decoded.color !== word.colors[0]) { // TODO: Check that mode is lockout // If it's lockout, cell is already checked and not by the player
                         console.error("Word already checked");
@@ -147,17 +147,17 @@ export function SOCKET(
                         word.colors.push(player.color);
                     }
                     
-                    await prisma.bingoGrids.update({
+                    await prisma.bingoRooms.update({
                         where: {
                             code: roomCode
                         },
                         data: {
-                            grid: gridGrid
+                            grid
                         }
                     });
 
                     // Send the updated grid to all clients
-                    sendToAllInRoom(roomCode, { action: "setGrid", grid: gridGrid });
+                    sendToAllInRoom(roomCode, { action: "setGrid", grid });
                     break;
 
                 case "setGridAndStartWord":
@@ -185,13 +185,13 @@ export function SOCKET(
         if (!res) return console.error("Client not in room");
         const { publicID, roomCode } = res;
 
-        const grid = await prisma.bingoGrids.findUnique({
+        const room = await prisma.bingoRooms.findUnique({
             where: {
                 code: roomCode
             }
         });
 
-        if (!grid) return console.error("Room not found");
+        if (!room) return console.error("Room not found");
 
         const playerToRemove = await prisma.bingoPlayers.findUnique({
             where: {
@@ -202,20 +202,20 @@ export function SOCKET(
 
         if (!playerToRemove) return console.error("Player to remove not found");
 
-        const gridAfterLeave = await prisma.bingoGrids.update({
+        const gridAfterLeave = await prisma.bingoRooms.update({
             where: {
                 code: roomCode
             },
             data: {
                 players: {
-                    set: grid.players.filter((p) => p !== playerToRemove.id)
+                    set: room.players.filter((p) => p !== playerToRemove.id)
                 }
             }
         });
 
         // If nobody is left in the room, delete it and all users associated with it
         if (gridAfterLeave.players.length === 0) {
-            await prisma.bingoGrids.delete({
+            await prisma.bingoRooms.delete({
                 where: {
                     code: roomCode
                 }

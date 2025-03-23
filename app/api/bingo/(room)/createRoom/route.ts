@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         let code = genCode();
         const publicID = uuidv4();
 
-        const allRooms = await prisma.bingoGrids.findMany();
+        const allRooms = await prisma.bingoRooms.findMany();
 
         while (allRooms.find((room) => room.code === code)) {
             code = genCode();
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         if (res instanceof Response) return res;
         const { grid, startWord } = res;
 
-        await prisma.bingoGrids.create({
+        await prisma.bingoRooms.create({
             data: {
                 code,
                 owner: user.id,

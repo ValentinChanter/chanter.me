@@ -13,13 +13,13 @@ export async function POST(req: NextRequest) {
     if (res instanceof Response) return res;
     const { code, decoded } = res;
 
-    const grid = await prisma.bingoGrids.findFirst({
+    const room = await prisma.bingoRooms.findFirst({
         where: {
             code
         }
     });
 
-    if (!grid) {
+    if (!room) {
         return new Response("Room doesn't exist", { status: 400 });
     }
 
@@ -36,12 +36,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ token: newToken });
     }
 
-    if (grid.players.includes(player.id)) {
+    if (room.players.includes(player.id)) {
         // Player is already in that game (very unlikely unless he has connection issues or copied his token)
         return NextResponse.json({ success: true }); // TODO: Kick old player via WebSocket and let this one in
     } else {
         // Player is not currently in the game but already joined before
-        await prisma.bingoGrids.update({
+        await prisma.bingoRooms.update({
             where: {
                 code
             },
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         });
 
         const secret = <jwt.Secret> process.env.JWT_SECRET;
-        const newToken = jwt.sign({ username: player.username, id: player.publicID, code, owner: grid.owner === player.id, color: player.color }, secret);
+        const newToken = jwt.sign({ username: player.username, id: player.publicID, code, owner: room.owner === player.id, color: player.color }, secret);
         return NextResponse.json({ token: newToken });
     }
 }

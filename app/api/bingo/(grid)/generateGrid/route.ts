@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         if (res instanceof Response) return res;
         const { grid, startWord } = res;
 
-        await prisma.bingoGrids.update({
+        await prisma.bingoRooms.update({
             where: { code },
             data: {
                 grid,

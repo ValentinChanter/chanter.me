@@ -24,20 +24,20 @@ export async function POST(req: NextRequest) {
         return new Response("Incorrect code", { status: 400 });
     }
 
-    const grid = await prisma.bingoGrids.findFirst({
+    const room = await prisma.bingoRooms.findFirst({
         where: {
             code
         }
     });
 
-    if (!grid) {
+    if (!room) {
         return new Response("Room doesn't exist", { status: 422 });
     }
 
     const owner = await prisma.bingoPlayers.findFirst({
         where: {
             roomCode: code,
-            id: grid.owner
+            id: room.owner
         }
     });
 
@@ -45,5 +45,5 @@ export async function POST(req: NextRequest) {
         return new Response("Owner not found", { status: 422 });
     }
 
-    return NextResponse.json({ owner: owner.username, playerCount: grid.players.length });
+    return NextResponse.json({ owner: owner.username, playerCount: room.players.length });
 }

@@ -9,16 +9,6 @@ datasource db {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model bingoGrids {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  grid      Json[]
-  players   String[] @db.Uuid
-  code      String   @unique
-  owner     String   @db.Uuid
-  startWord String
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model leaderboard {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username   String
@@ -42,4 +32,14 @@ model bingoPlayers {
   roomCode String
   color    String
   username String
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bingoRooms {
+  id        String   @id(map: "bingoGrids_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  grid      Json[]
+  players   String[] @db.Uuid
+  code      String   @unique(map: "bingoGrids_code_key")
+  owner     String   @db.Uuid
+  startWord String
 }
