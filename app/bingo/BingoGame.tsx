@@ -133,8 +133,8 @@ export default function BingoGame({ code }: { code: string }) {
                                                 <span className="break-words">{cell.word.replace(/_/g, " ") || i + 1}</span>
                                             </div>
                                         </div>
-                                        <div className="absolute inset-0 z-10 flex justify-center rounded-lg -translate-x-[4rem] translate-y-2/3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-[16rem] h-[8rem] dark-rectangle overflow-y-hidden no-scrollbar px-2 py-1">
-                                            <span className="break-words text-justify text-sm animate-scroll">{cell.description}</span>
+                                        <div className="absolute inset-0 z-10 flex justify-center rounded-lg -translate-x-[4rem] translate-y-2/3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-[calc(100%+8rem)] h-[8rem] dark-rectangle overflow-y-hidden no-scrollbar px-2 py-1">
+                                            <span className="break-words text-justify text-sm my-auto">{cell.description}</span>
                                         </div>
                                     </div>
                                 )
