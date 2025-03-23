@@ -112,7 +112,7 @@ export default function BingoGame({ code }: { code: string }) {
     return (
         <div className='flex h-screen'>
             {!hasCookie("jwt") || jwtDecode<{ code: string }>(getCookie("jwt") as string).code !== code ? (
-                <h1 className='m-auto'>Veuillez patienter. Nous vérifions votre jeton...</h1>
+                <span className='m-auto text-2xl'>Veuillez patienter. Nous vérifions votre jeton...</span>
             ) : (
                 <div className="flex flex-row m-auto justify-between w-full h-full px-20 py-8">
                     <div className="rounded-xl p-4 h-5/6 aspect-square my-auto dark-rectangle ">
