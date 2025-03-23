@@ -116,6 +116,7 @@ export function SOCKET(
 
             switch (action) {
                 case "ping":
+                    console.log("server sending")
                     client.send(JSON.stringify({ action: "pong" }));
                     break;
 

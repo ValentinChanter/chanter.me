@@ -24,6 +24,7 @@ export function useCells(url: () => string) {
 
         const sendHeartbeat = () => {
             if (ref.current && ref.current.readyState === WebSocket.OPEN) {
+                console.log("client sending")
                 ref.current.send(JSON.stringify({ action: 'ping', token }));
             }
         };
@@ -67,6 +68,7 @@ export function useCells(url: () => string) {
                     break;
 
                 case 'pong':
+                    console.log("client received")
                     break;
 
                 default:
