@@ -4,24 +4,110 @@ import * as readline from "readline";
 
 import { CONFIG } from "@/config/bingo";
 import { r2 } from '@/lib/r2';
+import example from "./parseInfoExample";
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 
-function initGrid(words: string[]) {
-    const grid = [] as { word: string, colors: string[] }[];
-    for (const word of words) {
-        grid.push({ word, colors: [] });
+async function parseInfoFromWikipedia(words: string[]) {
+    const url = process.env.WIKI_API_URL + words.map(word => encodeURIComponent(word)).join("|");
+    const params = {
+        headers: {
+            'Accept-Encoding': 'gzip',
+            'User-Agent': `WikiraceBingo/1.0 (${process.env.NEXT_PUBLIC_BASE_URL}/bingo; ${process.env.EMAIL}) Next.js/15.2.2`,
+        },
+    };
+
+    const res = await fetch(url, params);
+    const data = await res.json();
+
+    /**
+     * Example of data:
+     *  {
+     *      "continue": {
+     *          "excontinue": NUMBER_TO_CONTINUE_FOR_THE_NEXT,
+     *          "continue": "||"
+     *      },
+     *      "query": {
+     *          "normalized": [
+     *              {
+     *                  "from": "WORD",
+     *                  "to": "NORMALIZED_WORD"
+     *              }
+     *          "redirects": [
+     *              {
+     *                  "from": "WORD",
+     *                  "to": "REDIRECTED_WORD"
+     *              }
+     *          ],
+     *          "pages": {
+     *              "PAGE_ID": {
+     *                  "pageid": PAGE_ID,
+     *                  "ns": 0,
+     *                  "title": "REDIRECTED_WORD/WORD",
+     *                  "extract": "DESCRIPTION"
+     *              }
+     *          }
+     *      }
+     *  }
+     */
+
+    let dataContinue = data.continue as { excontinue: number, continue: string } | undefined;
+    const normalized = data.query.normalized as { from: string, to: string }[];
+    const redirected = data.query.redirects as { from: string, to: string }[];
+    let pages = data.query.pages as { [key: string]: { pageid: string, ns: number, title: string, extract: string } };
+
+    while (dataContinue) {
+        const continueUrl = url + `&excontinue=${dataContinue.excontinue}`;
+        const continueRes = await fetch(continueUrl, params);
+        const continueData = await continueRes.json();
+        const continuePages = continueData.query.pages as { [key: string]: { pageid: string, ns: number, title: string, extract: string } };
+        
+        dataContinue = continueData.continue as { excontinue: number, continue: string } | undefined;
+        for (const [key, page] of Object.entries(continuePages)) {
+            if (page.extract && !pages[key]?.extract) {
+                pages[key] = page;
+            }
+        }
+    }
+
+    return words
+    .map((word) => {
+        // Input word is like an_example, the normalized will be from "an_example" to "An Example" and the redirected will be from "An Example" to "The Example", so the final word is the redirected, from the normalized
+        const normalizedWord = normalized.find(n => n.from === word);
+        const redirectedWord = redirected.find(r => r.from === normalizedWord?.to || r.from === word);
+        const finalWord = redirectedWord?.to || normalizedWord?.to || word;
+
+        // Filter out words that, after normalization or redirection, are in the blacklist
+        // Replace " " with "_" since the RegEx are made for the ns0 titles that use "_" instead of " "
+        if (CONFIG.wordBlacklist.some(regex => regex.test(finalWord.replace(/ /g, "_")))) {
+            return undefined;
+        }
+
+        const page = Object.values(pages).find(p => p.title === finalWord);
+
+        return {
+            word: finalWord,
+            description: page?.extract || "Aucune description trouvée",
+        };
+    })
+    .filter((info) => info !== undefined) as { word: string, description: string }[];
+}
+
+function initGrid(info: { word: string, description: string }[]) {
+    const grid = [] as { word: string, colors: string[], description: string }[]; // Can't use Cell type here because the database only accepts JsonValue[], which Cell is not but this is
+    for (const { word, description } of info) {
+        grid.push({ word, colors: [], description });
     }
 
     return grid;
 }
 
-// We'll get 2n random words from the wordlist, and statiscally, we should get at least n words that are not in the blacklist (and by far)
-async function getNWords(stream: fs.ReadStream | NodeJS.ReadableStream, n: number ) {
+// We'll get (the closest multiple of 20 above 1.5n) random words from the wordlist, and statiscally, we should get at least n words that are not in the blacklist (and by far)
+async function getWords(stream: fs.ReadStream | NodeJS.ReadableStream, n: number) {
     const lines = new Set<number>(); // Set to avoid duplicates
+    const upperBound = Math.ceil(1.5 * n / 20) * 20; // Get (the closest multiple of 20 above 1.5n) random lines. 20 because Wikipedia requests are 20 per continue
 
-    // Get 2n random lines
-    while (lines.size < 2 * n) {
+    while (lines.size < upperBound) {
         const line = Math.floor(Math.random() * CONFIG.linecount);
 
         lines.add(line);
@@ -42,7 +128,7 @@ async function getNWords(stream: fs.ReadStream | NodeJS.ReadableStream, n: numbe
         }
 
         // Stop early if we reach the max line or if we have enough words
-        if (i === maxLine || words.length === n) break;
+        if (i === maxLine) break;
         i++;
     }
 
@@ -52,31 +138,35 @@ async function getNWords(stream: fs.ReadStream | NodeJS.ReadableStream, n: numbe
 }
 
 export default async function createGrid() {
-    let stream;
+    let info;
 
-    const filePath = path.join(process.cwd(), "public", `frwiki-${CONFIG.date}-all-titles-in-ns-0`);
-    if (fs.existsSync(filePath)) {
-        stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-    } else {
-        console.log("[WARN] Reading wordlist from S3 Bucket");
+    if (process.env.NODE_ENV === "production") {
+        let stream;
 
-        const file = await r2.send(new GetObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME,
-            Key: `frwiki-${CONFIG.date}-all-titles-in-ns-0`,
-        }));
+        const filePath = path.join(process.cwd(), "public", `frwiki-${CONFIG.date}-all-titles-in-ns-0`);
+        if (fs.existsSync(filePath)) {
+            stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+        } else {
+            console.log("[WARN] Reading wordlist from S3 Bucket");
 
-        if (!file || !file.Body) {
-            return new Response("Wordlist not found", { status: 500 });
+            const file = await r2.send(new GetObjectCommand({
+                Bucket: process.env.R2_BUCKET_NAME,
+                Key: `frwiki-${CONFIG.date}-all-titles-in-ns-0`,
+            }));
+
+            if (!file || !file.Body) {
+                return new Response("Wordlist not found", { status: 500 });
+            }
+
+            stream = file.Body as NodeJS.ReadableStream;
         }
 
-        stream = file.Body as NodeJS.ReadableStream;
-    }
+        const rawWords = await getWords(stream, 25 + 1);
+        info = await parseInfoFromWikipedia(rawWords)
+    } else info = example;
+    
+    const firsts = info.slice(0, 25);
+    const startWord = info[25].word;
 
-
-    const words = await getNWords(stream, 25 + 1);
-    const startWord = words.pop();
-
-    if (!startWord) return new Response("Start word not found", { status: 500 });
-
-    return { grid: initGrid(words), startWord };
+    return { grid: initGrid(firsts), startWord };
 }

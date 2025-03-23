@@ -43,3 +43,17 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+@keyframes scroll {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.group:hover .animate-scroll {
+  animation: scroll 5s linear infinite;
+  animation-delay: 4s;
+}
