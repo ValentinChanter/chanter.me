@@ -54,7 +54,7 @@ async function parseInfoFromWikipedia(words: string[]) {
     let dataContinue = data.continue as { excontinue: number, continue: string } | undefined;
     const normalized = data.query.normalized as { from: string, to: string }[];
     const redirected = data.query.redirects as { from: string, to: string }[];
-    let pages = data.query.pages as { [key: string]: { pageid: string, ns: number, title: string, extract: string } };
+    const pages = data.query.pages as { [key: string]: { pageid: string, ns: number, title: string, extract: string } };
 
     while (dataContinue) {
         const continueUrl = url + `&excontinue=${dataContinue.excontinue}`;
@@ -164,7 +164,7 @@ export default async function createGrid() {
         const rawWords = await getWords(stream, 25 + 1);
         info = await parseInfoFromWikipedia(rawWords)
     } else info = example;
-    
+
     const firsts = info.slice(0, 25);
     const startWord = info[25].word;
 
