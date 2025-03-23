@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props) {
   if (!res) {
     return {
       title: "Wikirace Bingo | chanter.me",
-      description: "Créez ou rejoigner un salon pour jouer au Wikirace Bingo contre vos amis !"
+      description: "Créez ou rejoignez un salon pour jouer au Wikirace Bingo contre vos amis !"
     };
   }
 
