@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
         if (!data) return new Response("Player not in room", { status: 400 });
 
         // Get grid
-        const { grid } = data;
-        const gridGrid = grid.grid as { word: string, colors: string[] }[];
+        const { room } = data;
+        const grid = room.grid as { word: string, colors: string[], description: string }[];
 
         // Get players
         const allPlayersInRoom = await prisma.bingoPlayers.findMany({
@@ -36,13 +36,13 @@ export async function POST(req: NextRequest) {
 
         if (!allPlayersInRoom) return new Response("No players in room", { status: 400 });
         
-        const players = grid.players.map((p) => {
+        const players = room.players.map((p) => {
             // Remove the id from the player object
             const { id, ...rest } = allPlayersInRoom.find((ap) => ap.id === p)!;
             return rest;
         });
 
-        return NextResponse.json({ grid: gridGrid as Cell[], players: players as Player[], startWord: grid.startWord });
+        return NextResponse.json({ grid: grid as Cell[], players: players as Player[], startWord: room.startWord });
     } else {
         return new Response("Invalid code", { status: 400 });
     }

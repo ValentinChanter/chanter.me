@@ -17,16 +17,16 @@ export async function isPlayerInRoom(uuid: string, code: string) {
 
     if (!player) return false;
 
-    const grid = await prisma.bingoGrids.findFirst({
+    const room = await prisma.bingoRooms.findFirst({
         where: {
             code
         }
     });
 
-    if (!grid) return false;
+    if (!room) return false;
 
-    if (grid.players.includes(player.id)) {
-        return { player, grid };
+    if (room.players.includes(player.id)) {
+        return { player, room };
     } else {
         return false;
     };
