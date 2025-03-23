@@ -121,16 +121,20 @@ export default function BingoGame({ code }: { code: string }) {
                                 <span className="row-span-5 col-span-5 text-center text-2xl my-auto">Chargement de la grille...</span>
                             ) : (
                                 cells.map((cell, i) => (
-                                    <div
-                                        key={i}
-                                        className="outline outline-white/15 rounded-lg p-1 text-white overflow-y-auto no-scrollbar aspect-square text-center cursor-pointer hover:bg-gray-600 active:bg-gray-700 text-sm flex"
-                                        style={{
-                                            backgroundColor: cell.colors.length > 0  ? cell.colors[0] : ""
-                                        }}
-                                        onClick={() => sendCell(cell, getCookie("jwt") as string)}
-                                    >
-                                        <div className="overflow-x-auto m-auto">
-                                            <span className="break-words">{cell.word.replace(/_/g, " ") || i + 1}</span>
+                                    <div key={i} className="relative group">
+                                        <div
+                                            className="outline outline-white/15 rounded-lg p-1 text-white overflow-y-auto no-scrollbar aspect-square text-center cursor-pointer hover:bg-gray-600 active:bg-gray-700 text-sm flex"
+                                            style={{
+                                                backgroundColor: cell.colors.length > 0  ? cell.colors[0] : ""
+                                            }}
+                                            onClick={() => sendCell(cell, getCookie("jwt") as string)}
+                                        >
+                                            <div className="overflow-x-auto m-auto">
+                                                <span className="break-words">{cell.word.replace(/_/g, " ") || i + 1}</span>
+                                            </div>
+                                        </div>
+                                        <div className="absolute inset-0 z-10 flex justify-center rounded-lg -translate-x-[4rem] translate-y-2/3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-[16rem] h-[8rem] dark-rectangle overflow-y-hidden no-scrollbar px-2 py-1">
+                                            <span className="break-words text-justify text-sm animate-scroll">{cell.description}</span>
                                         </div>
                                     </div>
                                 )
@@ -164,7 +168,7 @@ export default function BingoGame({ code }: { code: string }) {
                                     <div className="flex flex-col">
                                         <span className="text-xl">Mot de départ</span>
                                         <div className="text-center">
-                                            <a href={`https://fr.wikipedia.org/wiki/${startWord}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-words">{startWord.replace(/_/g, " ")}</a>
+                                            <a href={`https://fr.wikipedia.org/wiki/${startWord}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 break-words text-xl hover:underline">{startWord.replace(/_/g, " ")}</a>
                                         </div>
                                     </div>
                                 </div>
