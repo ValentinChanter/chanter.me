@@ -87,10 +87,14 @@ async function parseInfoFromWikipedia(words: string[]) {
 
         return {
             word: finalWord,
-            description: page?.extract || "Aucune description trouvée",
+            description: page?.extract,
         };
     })
-    .filter((info) => info !== undefined) as { word: string, description: string }[];
+    .filter((info) => {
+        return info !== undefined
+        && info.description
+        && !info.description.includes("peut faire référence à")
+    }) as { word: string, description: string }[];
 }
 
 function initGrid(info: { word: string, description: string }[]) {
