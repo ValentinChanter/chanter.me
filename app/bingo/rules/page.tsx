@@ -14,7 +14,7 @@ function BingoRules() {
                 <Image src="/bingoGame.png" width={1920} height={1080} alt="Capture d'écran d'un salon" className="rounded-lg outline-white/20 outline-1"></Image>
 
                 <span className="text-3xl mt-10">Déroulement d&apos;une partie</span>
-                <span>Le respect de ces règles n&apos;est pas forcé sur le joueurs mais il est préférable de rester honnête et de les respecter pour que la partie soit plus juste pour tout le monde.</span>
+                <span>Le respect de ces règles n&apos;est pas forcé sur le joueur mais il est préférable de rester honnête et de les respecter pour que la partie soit plus juste pour tout le monde.</span>
                 <span>Pour pouvoir récupérer une case de la grille, le joueur doit atteindre la page Wikipédia qui a pour titre celui affiché dans la case. Le joueur commence à la page Wikipédia affichée comme &quot;celle de départ&quot;. Une fois qu&apos;une page est atteinte et que la case est cochée, le joueur continue depuis cette même page pour essayer d&apos;atteindre une autre page.</span>
                 <span>Un joueur ne peut pas récupérer une case si elle a déjà été récupérée par quelqu&apos;un d&apos;autre.</span>
 
