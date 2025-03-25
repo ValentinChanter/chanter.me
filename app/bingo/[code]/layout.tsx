@@ -28,10 +28,12 @@ export async function generateMetadata({ params }: Props) {
   }
 
   const { owner, playerCount } = res as { owner: string, playerCount: number };
+  const remainingPlayerCount = playerCount - 1;
+  const plural = remainingPlayerCount === 1 ? "" : "s";
 
   return {
     title: `Wikirace Bingo - Salon ${code} | chanter.me`,
-    description: `Rejoignez ce salon maintenant pour affronter ${owner}${playerCount === 1 ? "" : ` et ${playerCount} autres personnes`} !`
+    description: `Rejoignez ce salon maintenant pour affronter ${owner}${playerCount <= 1 ? "" : ` et ${remainingPlayerCount} autre${plural} personne${plural}`} !`
   };
 }
 
