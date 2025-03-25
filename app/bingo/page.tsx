@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useSetCookie, useGetCookie, useHasCookie } from 'cookies-next/client';
 
+import Header from "./header";
+
 function Bingo() {
     const [username, setUsername] = useState("");
     const [code, setCode] = useState("");
@@ -130,47 +132,50 @@ function Bingo() {
     }, [searchParams]);
 
     return (
-        <div className='flex h-screen'>
-            <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[480px] dark-rectangle" onSubmit={(e) => joinRoom(e)}>
-                <div>
-                    <div className="h-[50px]">
-                        <span className="text-3xl">Rejoindre un salon</span>
+        <div className='flex flex-col h-screen'>
+            <Header title="Règles du Wikirace Bingo" link="/bingo/rules" />
+            <div className="flex flex-row h-[calc(100%-4rem)]">
+                <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[480px] dark-rectangle" onSubmit={(e) => joinRoom(e)}>
+                    <div>
+                        <div className="h-[50px]">
+                            <span className="text-3xl">Rejoindre un salon</span>
+                        </div>
+                        <div className="flex flex-col space-y-2 my-8">
+                            <label htmlFor="joinUsername">Nom d&apos;utilisateur</label>
+                            <input disabled={joinLoading} required id="joinUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setUsername(e.target.value)}></input>
+                        </div>
+                        <div className="flex flex-col space-y-2 mb-4">
+                            <label htmlFor="code">Code du salon</label>
+                            <input disabled={joinLoading} required id="code" type="text" pattern="[A-Z0-9]{4}" title="Veuillez entrer exactement 4 caractères alphanumériques." value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setCode(e.target.value.toUpperCase())}></input>
+                        </div>
+                        {joinError && (
+                            <span className="text-red-500">{joinError}</span>
+                        )}
                     </div>
-                    <div className="flex flex-col space-y-2 my-8">
-                        <label htmlFor="joinUsername">Nom d&apos;utilisateur</label>
-                        <input disabled={joinLoading} required id="joinUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setUsername(e.target.value)}></input>
-                    </div>
-                    <div className="flex flex-col space-y-2 mb-4">
-                        <label htmlFor="code">Code du salon</label>
-                        <input disabled={joinLoading} required id="code" type="text" pattern="[A-Z0-9]{4}" title="Veuillez entrer exactement 4 caractères alphanumériques." value={code} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setCode(e.target.value.toUpperCase())}></input>
-                    </div>
-                    {joinError && (
-                        <span className="text-red-500">{joinError}</span>
-                    )}
-                </div>
-                <button disabled={joinLoading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{joinLoading ? "Connexion en cours... Veuillez patienter." : "Rejoindre le salon"}</button>
-            </form>
+                    <button disabled={joinLoading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{joinLoading ? "Connexion en cours... Veuillez patienter." : "Rejoindre le salon"}</button>
+                </form>
 
-            <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[480px] dark-rectangle" onSubmit={(e) => createRoom(e)}>
-                <div>
-                    <div className="h-[50px]">
-                        <span className="text-3xl">Créer un salon</span>
-                        <span className=" ml-4 text-xs">Par souci de bande passante, cette fonctionnalité est restreinte.</span>
+                <form className="flex flex-col justify-between m-auto rounded-xl px-12 py-8 w-1/3 h-[480px] dark-rectangle" onSubmit={(e) => createRoom(e)}>
+                    <div>
+                        <div className="h-[50px]">
+                            <span className="text-3xl">Créer un salon</span>
+                            <span className=" ml-4 text-xs">Par souci de bande passante, cette fonctionnalité est restreinte.</span>
+                        </div>
+                        <div className="flex flex-col space-y-2 my-8">
+                            <label htmlFor="createUsername">Nom d&apos;utilisateur</label>
+                            <input disabled={createLoading} required id="createUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setUsername(e.target.value)}></input>
+                        </div>
+                        <div className="flex flex-col space-y-2 mb-4">
+                            <label htmlFor="token">Jeton d&apos;authentification</label>
+                            <input disabled={createLoading} required id="token" type="password" value={token} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setToken(e.target.value)}></input>
+                        </div>
+                        {createError && (
+                            <span className="text-red-500">{createError}</span>
+                        )}
                     </div>
-                    <div className="flex flex-col space-y-2 my-8">
-                        <label htmlFor="createUsername">Nom d&apos;utilisateur</label>
-                        <input disabled={createLoading} required id="createUsername" type="text" value={username} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setUsername(e.target.value)}></input>
-                    </div>
-                    <div className="flex flex-col space-y-2 mb-4">
-                        <label htmlFor="token">Jeton d&apos;authentification</label>
-                        <input disabled={createLoading} required id="token" type="password" value={token} className="bg-gray-700 rounded-lg px-4 py-2 outline outline-white/10 disabled:cursor-not-allowed" onChange={(e) => setToken(e.target.value)}></input>
-                    </div>
-                    {createError && (
-                        <span className="text-red-500">{createError}</span>
-                    )}
-                </div>
-                <button disabled={createLoading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{createLoading ? "Création en cours... Veuillez patienter." : "Créer un salon"}</button>
-            </form>
+                    <button disabled={createLoading} className="py-4 mt-8 w-full cursor-pointer dark-button disabled:cursor-not-allowed">{createLoading ? "Création en cours... Veuillez patienter." : "Créer un salon"}</button>
+                </form>
+            </div>
         </div>
     )
 }
