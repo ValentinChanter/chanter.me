@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtDecode } from "jwt-decode";
 
+interface NicoJwtPayload {
+    level2?: number;
+    age?: string | number;
+    [key: string]: unknown;
+  }
+
 function getJwtAlg(jwt: string): string | undefined {
     const parts = jwt.split(".");
     if (parts.length < 2) {
@@ -11,7 +17,7 @@ function getJwtAlg(jwt: string): string | undefined {
     return header.alg;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     return NextResponse.json({
         message: `The baker says: 'I'd rather have you send me the cookie by post.'`
     });
@@ -41,7 +47,7 @@ export async function POST(req: NextRequest) {
     }
     
     try {
-        const decoded = jwtDecode<any>(nico_jwt);
+        const decoded = jwtDecode<NicoJwtPayload>(nico_jwt);
 
         if (!decoded) throw new Error("Invalid JWT");
 
@@ -71,7 +77,7 @@ export async function POST(req: NextRequest) {
                 return new Response("Invalid JWT", { status: 400 });
             }
         }        
-    } catch (e) {
+    } catch {
         return NextResponse.json({
             message: "The baker says: 'This cookie doesn't seem to follow the 'nico_jwt' recipe although you named it that way.'"
         });

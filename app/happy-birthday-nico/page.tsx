@@ -33,7 +33,7 @@ export default function Happy_Birthday_Nico() {
                 
                 try {
                     // Decode JWT to determine level
-                    const decoded = jwtDecode<any>(storedJwt);
+                    const decoded = jwtDecode<NicoJwtPayload>(storedJwt);
                     
                     if (decoded.level4) {
                         setCurrentLevel(5);
@@ -91,7 +91,7 @@ export default function Happy_Birthday_Nico() {
                     } else if (decoded.start) {
                         setCurrentLevel(1);
                     }
-                } catch (e) {
+                } catch {
                     // Invalid JWT, clear it
                     setCookie('nico_jwt', '', { maxAge: 0 });
                 }
@@ -278,7 +278,7 @@ export default function Happy_Birthday_Nico() {
                     {currentLevel === 1 && (
                         <form className="flex flex-col self-center" onSubmit={(e) => checkLevel1(e)}>
                             <div className="text-center mb-4 flex-col flex" >
-                                <span>The "/api/happy-birthday-nico/settings" endpoint is at your disposal.</span>
+                                <span>The &quot;/api/happy-birthday-nico/settings&quot; endpoint is at your disposal.</span>
                                 <span>Open it in a new tab to avoid losing progress.</span>
                             </div>
                             <label htmlFor="flag1" className="mb-2">Find the flag:</label>
@@ -323,7 +323,7 @@ export default function Happy_Birthday_Nico() {
                     {currentLevel === 3 && (
                         <form className="flex flex-col self-center" onSubmit={(e) => checkLevel3(e)}>
                             <div className="text-center mb-4 flex-col flex" >
-                                <span>Visit "/api/happy-birthday-nico/bakery" with your cookie.</span>
+                                <span>Visit &quot;/api/happy-birthday-nico/bakery&quot; with your cookie.</span>
                                 <span>The baker will give you feedback on your cookie.</span>
                             </div>
                             <label htmlFor="flag3" className="mb-2">Enter the flag:</label>
