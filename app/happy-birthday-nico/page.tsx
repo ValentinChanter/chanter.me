@@ -5,6 +5,17 @@ import Image from "next/image";
 import { useSetCookie, useGetCookie, useHasCookie } from 'cookies-next/client';
 import { jwtDecode } from "jwt-decode";
 
+interface NicoJwtPayload {
+    level5?: boolean;
+    level4?: boolean;
+    level3?: boolean;
+    level2?: boolean;
+    level1?: boolean;
+    start?: boolean;
+    iat?: number;
+    exp?: number;
+}
+
 export default function Happy_Birthday_Nico() {
     const [username, setUsername] = useState("");
     const [currentLevel, setCurrentLevel] = useState(0);
