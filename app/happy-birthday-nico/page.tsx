@@ -49,7 +49,7 @@ export default function Happy_Birthday_Nico() {
                     if (decoded.level4) {
                         setCurrentLevel(5);
                         // Also need to fetch the image URL for level 5
-                        fetch("/api/happy-birthday-nico/restoreLevel4", {
+                        fetch("/api/happy-birthday-nico/restoreLevel5", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
