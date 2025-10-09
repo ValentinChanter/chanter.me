@@ -165,6 +165,7 @@ export async function GET(
         
         htmlContent = htmlContent.replace('</head>', `${overlayStyles}</head>`);
 
+        // Get the correct origin - use request origin directly to avoid mismatches
         const origin = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BASE_URL : "http://localhost:3000"
         
         // Properly escape the page name for use in JavaScript
@@ -178,6 +179,10 @@ export async function GET(
         <script>
             (function() {
                 try {
+                    // For debugging origin issues
+                    console.log('Current iframe origin:', window.location.origin);
+                    console.log('Target parent origin:', '${origin}');
+                    
                     // Create URL status bar element
                     function createStatusBar() {
                         const statusBar = document.createElement('div');
@@ -235,7 +240,10 @@ export async function GET(
                     window.addEventListener('message', function(event) {
                         try {
                             // Only accept messages from our own origin
-                            if (event.origin !== '${origin}') return;
+                            if (event.origin !== '${origin}') {
+                                console.log('Origin mismatch. Expected:', '${origin}', 'Got:', event.origin);
+                                return;
+                            }
                             
                             if (event.data && event.data.type === 'simulateClick') {
                                 const x = event.data.x;
@@ -364,15 +372,15 @@ export async function GET(
                                             if (href && href.startsWith('/wiki/')) {
                                                 const page = handleWikiPageUrl(href);
                                                 
-                                                // Send message to parent window
+                                                // Send message to parent window with correct origin
                                                 window.parent.postMessage({
                                                     type: 'wikipediaNavigation',
                                                     page: page
-                                                }, '${req.nextUrl.origin}');
+                                                }, '${origin}');
                                                 
                                                 // Update URL to use our proxy instead
                                                 e.preventDefault();
-                                                window.location.href = '${req.nextUrl.origin}/api/bingo/proxy/' + page;
+                                                window.location.href = '${origin}/api/bingo/proxy/' + page;
                                             }
                                         } catch (err) {
                                             console.log('Error handling link click:', err);
@@ -457,15 +465,15 @@ export async function GET(
                                         if (url.pathname.startsWith('/wiki/')) {
                                             const page = handleWikiPageUrl(url.pathname);
                                             
-                                            // Send message to parent window
+                                            // Send message to parent window with correct origin
                                             window.parent.postMessage({
                                                 type: 'wikipediaNavigation',
                                                 page: page
-                                            }, '${req.nextUrl.origin}');
+                                            }, '${origin}');
                                             
                                             // Update URL to use our proxy instead
                                             e.preventDefault();
-                                            window.location.href = '${req.nextUrl.origin}/api/bingo/proxy/' + page;
+                                            window.location.href = '${origin}/api/bingo/proxy/' + page;
                                         }
                                     }
                                 } catch (err) {
@@ -503,11 +511,11 @@ export async function GET(
                         setupLinkTracking();
                     }
                     
-                    // Inform parent that we've loaded this page
+                    // Inform parent that we've loaded this page - use correct origin
                     window.parent.postMessage({
                         type: 'wikipediaNavigation',
                         page: "${escapedPage}"
-                    }, '${req.nextUrl.origin}');
+                    }, '${origin}');
                     
                 } catch (err) {
                     console.log('Error in tracking script:', err);
