@@ -164,6 +164,8 @@ export async function GET(
         </style>`;
         
         htmlContent = htmlContent.replace('</head>', `${overlayStyles}</head>`);
+
+        const origin = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BASE_URL : "http://localhost:3000"
         
         // Properly escape the page name for use in JavaScript
         const escapedPage = page.replace(/['\\]/g, '\\$&');
@@ -233,7 +235,7 @@ export async function GET(
                     window.addEventListener('message', function(event) {
                         try {
                             // Only accept messages from our own origin
-                            if (event.origin !== '${req.nextUrl.origin}') return;
+                            if (event.origin !== '${origin}') return;
                             
                             if (event.data && event.data.type === 'simulateClick') {
                                 const x = event.data.x;
