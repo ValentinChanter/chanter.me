@@ -1,12 +1,16 @@
 import { WebSocket } from "ws";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 import * as jwt from "jsonwebtoken";
 
 import { Cell } from "../../../bingo/types";
 import { isPlayerInRoom } from "../_shared/isPlayerInRoom";
+import { checkForWin, findWinnersByMostCells } from "../_shared/gameLogic";
 
 const prisma = new PrismaClient();
+
+// Store active game timers
+const gameTimers: Map<string, NodeJS.Timeout> = new Map();
 
 const rooms: Map<string, Set<{client: WebSocket, publicID: string}>> = new Map();
 
@@ -88,7 +92,7 @@ export function SOCKET(
             return;
         }
 
-        const { action, token }: { action: string; token: string } = json;
+        const { action, token, duration }: { action: string; token: string; duration?: number } = json;
 
         if (!action || !token) {
             console.error("Invalid JSON received");
@@ -121,9 +125,22 @@ export function SOCKET(
 
                 case "join":
                     sendToAllInRoomExcept(roomCode, { action: "addPlayer", player: { publicID: player.publicID, username: player.username, color: player.color } }, client);
+                    
+                    // Send grid reveal status and timer to the joining player
+                    client.send(JSON.stringify({ 
+                        action: "gridStatus", 
+                        gridRevealed: room.gridRevealed,
+                        gameEndTime: room.gameEndTime
+                    }));
                     break;
 
                 case "setCell":
+                    // Only allow cell marking if the grid has been revealed
+                    if (!room.gridRevealed) {
+                        console.error("Grid not revealed yet");
+                        return;
+                    }
+                    
                     const grid = room.grid as { word: string, colors: string[], description: string }[];
                     const cell = json.cell as Cell;
 
@@ -140,12 +157,15 @@ export function SOCKET(
                         return;
                     }
 
+                    /*
                     // Add the player's color to the word, or remove it if it's already there
                     if (word.colors.includes(player.color)) {
                         word.colors = word.colors.filter((c) => c !== player.color);
                     } else {
                         word.colors.push(player.color);
                     }
+                    */
+                    word.colors.push(player.color);
                     
                     await prisma.bingoRooms.update({
                         where: {
@@ -158,6 +178,18 @@ export function SOCKET(
 
                     // Send the updated grid to all clients
                     sendToAllInRoom(roomCode, { action: "setGrid", grid });
+                    
+                    // Check if this move resulted in a win
+                    if (checkForWin(grid, player.color)) {
+                        sendToAllInRoom(roomCode, { 
+                            action: "playerWon", 
+                            winner: {
+                                username: player.username,
+                                color: player.color,
+                                publicID: player.publicID
+                            }
+                        });
+                    }
                     break;
 
                 case "setGridAndStartWord":
@@ -166,16 +198,119 @@ export function SOCKET(
 
                     // Check if the requestee is the owner
                     if (decoded.owner) {
-                        sendToAllInRoomExcept(roomCode, { action: "setGridAndStartWord", grid: newGrid, startWord }, client);
+                        // Clear any existing game timer for this room
+                        if (gameTimers.has(roomCode)) {
+                            clearTimeout(gameTimers.get(roomCode)!);
+                            gameTimers.delete(roomCode);
+                        }
+                        
+                        // Update the room with the new grid and reset gridRevealed and timer
+                        await prisma.bingoRooms.update({
+                            where: {
+                                code: roomCode
+                            },
+                            data: {
+                                grid: newGrid as unknown as Prisma.InputJsonValue[],
+                                startWord: startWord,
+                                gridRevealed: false,
+                                gameEndTime: null
+                            }
+                        });
+                        
+                        sendToAllInRoom(roomCode, { 
+                            action: "setGridAndStartWord", 
+                            grid: newGrid, 
+                            startWord 
+                        });
+                        
+                        // Also inform all clients that the grid is hidden again and timer is reset
+                        sendToAllInRoom(roomCode, { 
+                            action: "gridStatus", 
+                            gridRevealed: false,
+                            gameEndTime: null
+                        });
                     }
+                    break;
+
+                case "revealGrid":
+                    // Only the room owner can reveal the grid
+                    if (!decoded.owner) {
+                        console.error("Only the owner can reveal the grid");
+                        return;
+                    }
+                    
+                    // Get game duration, default to 30 minutes if not specified
+                    const gameDuration = duration || 30 * 60; // seconds
+                    
+                    // Calculate end time based on current time + duration
+                    const gameEndTime = new Date();
+                    gameEndTime.setSeconds(gameEndTime.getSeconds() + gameDuration);
+
+                    // Update the room with revealed status and end time
+                    await prisma.bingoRooms.update({
+                        where: {
+                            code: roomCode
+                        },
+                        data: {
+                            gridRevealed: true,
+                            gameEndTime: gameEndTime
+                        }
+                    });
+
+                    // Inform all clients that the grid is now revealed with timer
+                    sendToAllInRoom(roomCode, { 
+                        action: "revealGrid",
+                        gameEndTime: gameEndTime
+                    });
+
+                    // Set up server-side timer to determine winner when time expires
+                    if (gameTimers.has(roomCode)) {
+                        clearTimeout(gameTimers.get(roomCode)!);
+                    }
+                    
+                    const timeoutId = setTimeout(async () => {
+                        try {
+                            // Get fresh room data
+                            const currentRoom = await prisma.bingoRooms.findUnique({
+                                where: {
+                                    code: roomCode
+                                }
+                            });
+                            
+                            if (!currentRoom) return;
+                            
+                            // Get grid and players
+                            const grid = JSON.parse(JSON.stringify(currentRoom.grid)) as Cell[];
+                            const players = currentRoom.players;
+                            
+                            // Determine winner(s) based on most cells
+                            const winners = await findWinnersByMostCells(grid, players);
+                            
+                            // No winners if no one has any cells
+                            if (winners.length === 0) return;
+                            
+                            // Send game finished event with winner(s)
+                            sendToAllInRoom(roomCode, {
+                                action: "playerWon",
+                                winner: winners.length === 1 ? winners[0] : winners
+                            });
+                            
+                            gameTimers.delete(roomCode);
+                            
+                        } catch (error) {
+                            console.error("Error determining winner at game end:", error);
+                        }
+                    }, gameDuration * 1000);
+                    
+                    gameTimers.set(roomCode, timeoutId);
                     break;
 
                 default:
                     console.error("Invalid action");
                     return;
             }
-        } catch {
-            console.error("Invalid token");
+        } catch (error) {
+            console.error("Error processing message:", error);
             return;
         }
     });
@@ -230,5 +365,15 @@ export function SOCKET(
 
         sendToAllInRoom(roomCode, { action: "removePlayer", publicID: publicID });
         removeFromRoom(roomCode, client);
+
+        // Make sure to clear timer if no players left
+        if (res) {
+            const { roomCode } = res;
+            // If no players left and there's an active timer, clear it
+            if (gameTimers.has(roomCode) && !rooms.has(roomCode)) {
+                clearTimeout(gameTimers.get(roomCode)!);
+                gameTimers.delete(roomCode);
+            }
+        }
     });
 }
