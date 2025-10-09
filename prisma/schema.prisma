@@ -36,12 +36,14 @@ model bingoPlayers {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model bingoRooms {
-  id        String   @id(map: "bingoGrids_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  grid      Json[]
-  players   String[] @db.Uuid
-  code      String   @unique(map: "bingoGrids_code_key")
-  owner     String   @db.Uuid
-  startWord String
+  id           String    @id(map: "bingoGrids_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  grid         Json[]
+  players      String[]  @db.Uuid
+  code         String    @unique(map: "bingoGrids_code_key")
+  owner        String    @db.Uuid
+  startWord    String
+  gridRevealed Boolean   @default(false)
+  gameEndTime  DateTime? @db.Timestamptz(6)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

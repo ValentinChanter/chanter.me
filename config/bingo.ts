@@ -1,6 +1,6 @@
 export const CONFIG = {
-    date: "20250317",
-    linecount: 4453597,
+    date: "20251007",
+    linecount: 4521222,
     wordBlacklist: [
         /^liste_/i, // Liste de quelque chose
         /_\(homonymie\)$/i, // Homonymie
