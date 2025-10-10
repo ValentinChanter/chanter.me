@@ -90,7 +90,8 @@ export async function GET(
             'wikitable',
             'autres-projets',
             'toccolours',
-            'indicateur-langue'
+            'indicateur-langue',
+            'notheme'
         ];
 
         // Generate CSS selectors for each class
