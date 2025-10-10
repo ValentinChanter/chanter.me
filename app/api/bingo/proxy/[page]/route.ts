@@ -303,7 +303,7 @@ export async function GET(
                                     window.parent.postMessage({
                                         type: 'cursorStyle',
                                         cursor: cursor
-                                    }, '${req.nextUrl.origin}');
+                                    }, '${origin}');
                                 }
                             }
                         } catch (err) {
