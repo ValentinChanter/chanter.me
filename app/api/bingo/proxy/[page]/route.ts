@@ -53,7 +53,8 @@ export async function GET(
             'extiw', // Class for "modifier Wikidata"
             'tnavbar', // Class for the "v . m" on the navbox
             'noviewer', // Little pencil in infobox
-            'wd_p625' // Coordinates in infobox
+            'wd_p625', // Coordinates in infobox
+            'mw-kartographer-maplink' // Other class for coordinates in infobox
         ];
 
         // Generate CSS selectors for each class
