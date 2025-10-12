@@ -272,15 +272,23 @@ export async function GET(
                     
                     // Function to handle Wikipedia page URLs that may contain slashes
                     function handleWikiPageUrl(url) {
-                        if (!url) return '';
+                        if (!url) return { pageName: '', fragment: '' };
                         
                         // Extract the page name from the URL
                         let page = '';
+                        let fragment = '';
+                        
+                        // Extract fragment if it exists
+                        const hashIndex = url.indexOf('#');
+                        if (hashIndex !== -1) {
+                            fragment = url.substring(hashIndex);
+                            url = url.substring(0, hashIndex);
+                        }
                         
                         if (url.startsWith('/wiki/')) {
                             page = url.substring(6); // Remove '/wiki/'
                         } else if (url.includes('/wiki/')) {
-                            const matches = url.match(/\\/wiki\\/([^#?]*)/);
+                            const matches = url.match(/\\/wiki\\/([^?]*)/);
                             if (matches && matches[1]) {
                                 page = matches[1];
                             }
@@ -295,7 +303,7 @@ export async function GET(
                             page = page.split('/')[0];
                         }
                         
-                        return page;
+                        return { pageName: page, fragment: fragment };
                     }
                     
                     // Function to track all link clicks
@@ -330,17 +338,18 @@ export async function GET(
                                         try {
                                             const href = this.getAttribute('href');
                                             if (href && href.startsWith('/wiki/')) {
-                                                const page = handleWikiPageUrl(href);
+                                                const { pageName, fragment } = handleWikiPageUrl(href);
                                                 
                                                 // Send message to parent window with correct origin
                                                 window.parent.postMessage({
                                                     type: 'wikipediaNavigation',
-                                                    page: page
+                                                    page: pageName,
+                                                    fragment: fragment
                                                 }, '${origin}');
                                                 
                                                 // Update URL to use our proxy instead
                                                 e.preventDefault();
-                                                window.location.href = '${origin}/api/bingo/proxy/' + page;
+                                                window.location.href = '${origin}/api/bingo/proxy/' + pageName + fragment;
                                             }
                                         } catch (err) {
                                             console.log('Error handling link click:', err);
@@ -433,17 +442,18 @@ export async function GET(
                                         }
                                         
                                         if (url.pathname.startsWith('/wiki/')) {
-                                            const page = handleWikiPageUrl(url.pathname);
+                                            const { pageName, fragment } = handleWikiPageUrl(url.pathname + url.hash);
                                             
                                             // Send message to parent window with correct origin
                                             window.parent.postMessage({
                                                 type: 'wikipediaNavigation',
-                                                page: page
+                                                page: pageName,
+                                                fragment: fragment
                                             }, '${origin}');
                                             
                                             // Update URL to use our proxy instead
                                             e.preventDefault();
-                                            window.location.href = '${origin}/api/bingo/proxy/' + page;
+                                            window.location.href = '${origin}/api/bingo/proxy/' + pageName + fragment;
                                         }
                                     }
                                 } catch (err) {
