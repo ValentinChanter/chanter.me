@@ -29,7 +29,6 @@ export async function GET(
         
         // List of classes that should be greyed out and have links disabled
         const greyedOutClasses = [
-            'infobox',
             'vector-header-start',
             'vector-menu',
             'vector-header-end',
@@ -82,6 +81,7 @@ export async function GET(
                 background-color: rgba(128, 128, 128, 0.6);
                 z-index: 1000;
                 cursor: not-allowed;
+                pointer-events: auto !important;
             }
             
             /* Disable links individually for each class */
@@ -90,6 +90,11 @@ export async function GET(
                 cursor: default !important;
                 color: inherit !important;
                 text-decoration: none !important;
+            }
+
+            /* Also disable the parent elements from propagating clicks */
+            ${greyedOutClasses.map(className => `.${className}`).join(', ')} {
+                pointer-events: none !important;
             }
 
             /* Specific styling for "new" class links (red links to non-existent pages) */
@@ -138,10 +143,6 @@ export async function GET(
         <script>
             (function() {
                 try {
-                    // For debugging origin issues
-                    console.log('Current iframe origin:', window.location.origin);
-                    console.log('Target parent origin:', '${origin}');
-                    
                     // Create URL status bar element
                     function createStatusBar() {
                         const statusBar = document.createElement('div');
@@ -366,7 +367,30 @@ export async function GET(
                                             // Create and add overlay
                                             var overlay = document.createElement('div');
                                             overlay.className = '${overlayClassname}';
+                                            // Add click interceptor to ensure no clicks get through
+                                            overlay.addEventListener('click', function(e) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                return false;
+                                            }, true);
                                             element.appendChild(overlay);
+                                            
+                                            // Also disable all links inside this element
+                                            var links = element.querySelectorAll('a');
+                                            Array.prototype.forEach.call(links, function(link) {
+                                                // Remove existing click listeners
+                                                link.outerHTML = link.outerHTML;
+                                                // Get the newly created element (without event listeners)
+                                                var newLink = element.querySelector('a[href="' + link.getAttribute('href') + '"]');
+                                                if (newLink) {
+                                                    // Add a click preventer
+                                                    newLink.addEventListener('click', function(e) {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        return false;
+                                                    }, true);
+                                                }
+                                            });
                                         } catch (err) {
                                             console.log('Error processing element with class ' + className + ':', err);
                                         }
