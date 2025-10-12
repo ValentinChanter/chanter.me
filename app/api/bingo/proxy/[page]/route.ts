@@ -23,48 +23,8 @@ export async function GET(
         
         let htmlContent = await response.text();
         
-        // Handle protocol-relative URLs for Wikimedia images to prevent double processing
-        htmlContent = htmlContent.replace(
-            /(src|href|srcset)=(["'])(\/\/upload\.wikimedia\.org\/[^"']*)(["'])/g,
-            (_match, attr, quote1, path, quote2) => {
-                return `${attr}=${quote1}https:${path}${quote2}`;
-            }
-        );
-        
-        // Fix relative URLs for resources that are not Wikimedia uploads
-        htmlContent = htmlContent.replace(
-            /(href|src|srcset)=(["'])\/(?!\/)((?!upload\.wikimedia\.org)[^"']*)(["'])/g, 
-            (_match, attr, quote1, path, quote2) => {
-                return `${attr}=${quote1}https://fr.wikipedia.org/${path}${quote2}`;
-            }
-        );
-        
-        // Fix relative URLs in CSS
-        htmlContent = htmlContent.replace(
-            /url\(['"]?\/(?!\/)((?!upload\.wikimedia\.org)[^'")]+)['"]?\)/g,
-            (_match, path) => {
-                return `url('https://fr.wikipedia.org/${path}')`;
-            }
-        );
-        
-        // Handle data-src attributes (lazy loading images) - exclude Wikimedia uploads
-        htmlContent = htmlContent.replace(
-            /data-src="\/(?!\/)((?!upload\.wikimedia\.org)[^"]+)"/g,
-            (_match, path) => {
-                return `data-src="https://fr.wikipedia.org/${path}"`;
-            }
-        );
-        
-        // Fix any other protocol-relative URLs
-        htmlContent = htmlContent.replace(
-            /(src|href)=(["'])(\/\/(?!upload\.wikimedia\.org)[^"']+)(["'])/g,
-            (_match, attr, quote1, path, quote2) => {
-                return `${attr}=${quote1}https:${path}${quote2}`;
-            }
-        );
-        
-        // Base tag to make relative URLs resolve correctly
-        const baseTag = `<base href="https://fr.wikipedia.org/">`;
+        const pageUrl = response.url;
+        const baseTag = `<base href="${pageUrl}">`;
         htmlContent = htmlContent.replace('<head>', `<head>${baseTag}`);
         
         // List of classes that should be greyed out and have links disabled
