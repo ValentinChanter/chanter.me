@@ -60,13 +60,8 @@ export async function GET(
         // Generate CSS selectors for each class
         const greyedOutSelectors = greyedOutClasses.map(className => `.${className}`).join(', ');
         
-        // Remove selector for <ul> elements with no id or class - we don't want to grey these out anymore
-        
-        // Add selector for elements with typeof="mw:File/Thumb"
-        const typeofSelectors = '[typeof="mw:File/Thumb"]';
-        
-        // Combine all selectors - no longer including unlabeled ul elements
-        const combinedSelectors = `${greyedOutSelectors}, ${typeofSelectors}`;
+        // Combine all selectors (if any more)
+        const combinedSelectors = `${greyedOutSelectors}`;
         const overlayClassname = 'wikipedia-proxy-overlay';
         
         // Add CSS for overlay to the head section - Fix specificity issues
@@ -89,8 +84,8 @@ export async function GET(
                 cursor: not-allowed;
             }
             
-            /* Disable links individually for each class and for elements without attributes - removed ul selector */
-            ${greyedOutClasses.map(className => `.${className} a`).join(', ')}, ${typeofSelectors} a, a.new {
+            /* Disable links individually for each class */
+            ${greyedOutClasses.map(className => `.${className} a`).join(', ')}, a.new {
                 pointer-events: none !important;
                 cursor: default !important;
                 color: inherit !important;
@@ -379,19 +374,6 @@ export async function GET(
                                 });
                                 
                                 // Remove the code for handling unlabeled <ul> elements - we want these to be interactive now
-                                
-                                // Also handle elements with typeof="mw:File/Thumb"
-                                var thumbElements = document.querySelectorAll('[typeof="mw:File/Thumb"]');
-                                Array.prototype.forEach.call(thumbElements, function(element) {
-                                    try {
-                                        // Create and add overlay
-                                        var overlay = document.createElement('div');
-                                        overlay.className = '${overlayClassname}';
-                                        element.appendChild(overlay);
-                                    } catch (err) {
-                                        console.log('Error processing thumb element:', err);
-                                    }
-                                });
                             } catch (err) {
                                 console.log('Error handling greyed out elements:', err);
                             }
