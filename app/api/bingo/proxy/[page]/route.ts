@@ -36,22 +36,25 @@ export async function GET(
             'vector-dropdown-checkbox',
             'vector-dropdown-label',
             'mw-indicators',
-            'hatnote',
             'bandeau-niveau-ebauche',
             'mw-editsection',
-            'mw-references-wrap',
-            'navbox',
+            'mw-references-wrap', // "Notes" and "Références" in "Notes et références"
             'bandeau-portail',
             'catlinks',
             'mw-footer',
             'bandeau-niveau-information',
             'thumb',
             'DebutCarte',
-            'wikitable',
             'autres-projets',
-            'toccolours',
             'indicateur-langue',
-            'notheme'
+            'notheme',
+            'mw-file-description', // Class for image description boxes
+            'external', // Class for individual reference text (or the whole reference, depending on the page), at the bottom of the page
+            'cachelinks', // Class for the little [archive]
+            'extiw', // Class for "modifier Wikidata"
+            'tnavbar', // Class for the "v . m" on the navbox
+            'noviewer', // Little pencil in infobox
+            'wd_p625' // Coordinates in infobox
         ];
 
         // Generate CSS selectors for each class
