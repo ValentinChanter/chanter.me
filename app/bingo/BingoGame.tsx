@@ -8,6 +8,18 @@ import { jwtDecode } from "jwt-decode";
 import { useCells } from "./websocket";
 import Confetti from "../components/Confetti";
 
+function safeJwtDecode<T>(token: string | undefined | null): T | null {
+    if (!token) {
+        return null;
+    }
+
+    try {
+        return jwtDecode<T>(token);
+    } catch {
+        return null;
+    }
+}
+
 export default function BingoGame({ code }: { code: string }) {
     const hasCookie = useHasCookie();
     const getCookie = useGetCookie();
@@ -28,6 +40,8 @@ export default function BingoGame({ code }: { code: string }) {
     const [gameDuration, setGameDuration] = useState(30 * 60); // Default 30 minutes in seconds
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const jwt = getCookie("jwt");
+    const jwtPayload = safeJwtDecode<{ code?: string; owner?: boolean }>(jwt);
 
     function generateGrid() {
         fetch("/api/bingo/generateGrid", {
@@ -304,8 +318,11 @@ export default function BingoGame({ code }: { code: string }) {
         if (!word || gameFinished) return;
         
         const cell = cells.find(c => c.word === word.replace(/_/g, " "));
-        if (cell && !cell.colors.includes(jwtDecode<{ color: string }>(getCookie("jwt") as string).color)) {
-            sendCell(cell, getCookie("jwt") as string);
+        const currentJwt = getCookie("jwt");
+        const decodedJwt = safeJwtDecode<{ color: string }>(currentJwt);
+
+        if (cell && decodedJwt && !cell.colors.includes(decodedJwt.color)) {
+            sendCell(cell, currentJwt as string);
         }
     }, [cells, gameFinished, getCookie, sendCell]);
 
@@ -398,7 +415,7 @@ export default function BingoGame({ code }: { code: string }) {
 
     return (
         <div className='flex h-screen'>
-            {!hasCookie("jwt") || jwtDecode<{ code: string }>(getCookie("jwt") as string).code !== code ? (
+            {!hasCookie("jwt") || jwtPayload?.code !== code ? (
                 <span className='m-auto text-2xl'>Veuillez patienter. Nous vérifions votre jeton...</span>
             ) : (
                 <div className="flex flex-row m-auto justify-between w-full h-full px-20 py-8">
@@ -569,7 +586,7 @@ export default function BingoGame({ code }: { code: string }) {
                                     )}
                                     
                                     {/* Show timer input and reveal button for owner if grid not revealed */}
-                                    {jwtDecode<{ owner: boolean }>(getCookie("jwt") as string).owner && !gridRevealed && (
+                                    {jwtPayload?.owner && !gridRevealed && (
                                         <>
                                             <div className="mb-4">
                                                 <label htmlFor="gameDurationHours" className="block text-center mb-2">
@@ -625,7 +642,7 @@ export default function BingoGame({ code }: { code: string }) {
                                         </>
                                     )}
                                     
-                                    {jwtDecode<{ owner: boolean }>(getCookie("jwt") as string).owner && (
+                                    {jwtPayload?.owner && (
                                         <button className="dark-button py-4 px-2 w-full cursor-pointer" onClick={() => generateGrid()}>Générer une nouvelle grille</button>
                                     )}
                                 </div>
